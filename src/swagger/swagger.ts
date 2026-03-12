@@ -1,16 +1,27 @@
 import swaggerJsdoc from "swagger-jsdoc";
 
 const options = {
- definition: {
-   openapi: "3.0.0",
-   info: {
-     title: "Anime Dating API",
-     version: "1.0.0"
-   }
- },
- apis: ["./src/routes/*.ts"]
+  definition: {
+    openapi: "3.0.3",
+    info: {
+      title: "Anime Dating API",
+      version: "1.0.0",
+      description: "API для сайта знакомств с аниме-тянками",
+    },
+    servers: [
+      { url: "http://localhost:3001" }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+  },
+  apis: ["./src/routes/*.ts"],
 };
 
-const swaggerSpec = swaggerJsdoc(options);
-
-export default swaggerSpec;
+export const swaggerSpec = swaggerJsdoc(options);
