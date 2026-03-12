@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { profiles } from "./data/profiles";
 
@@ -7,36 +7,24 @@ import Auth from "./components/pages/Auth";
 import Navbar from "./components/layout/Navbar";
 import BackgroundEffects from "./components/layout/BackgroundEffects";
 
-import FinishScreen from "./components/pages/FinishScreen";
 import SwipeScreen from "./components/pages/SwipeScreen";
+import FinishScreen from "./components/pages/FinishScreen";
 
 import MatchList from "./components/profile/MatchList";
 
-import { useAuth } from "./hooks/useAuth";
+import ProtectedRoute from "./routing/ProtectedRoute";
+import { AuthProvider, useAuthContext } from './context/AuthContext';
 
-
-// --- Только для авторизованных ---
-function ProtectedRoute({ user }) {
-  if (!user) {
-    return <Navigate to="/auth/login" replace />;
-  }
-
-  return <Outlet />;
+function AppWrapper() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
 }
-
-
-// --- Только для гостей ---
-function GuestRoute({ user }) {
-  if (user) {
-    return <Navigate to="/swipe" replace />;
-  }
-
-  return <Outlet />;
-}
-
 
 function App() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
 
   const [index, setIndex] = useState(0);
   const [matches, setMatches] = useState([]);
@@ -46,6 +34,7 @@ function App() {
   const next = () => setIndex((prev) => prev + 1);
 
   const handleLike = () => {
+    if (!user) return;
     setMatches((prev) => [...prev, profile]);
     next();
   };
@@ -65,7 +54,7 @@ function App() {
         <BackgroundEffects />
 
         <div className="app-container">
-
+          {/* Navbar only shows when user is logged in */}
           {user && (
             <Navbar
               user={user}
@@ -76,60 +65,59 @@ function App() {
           )}
 
           <Routes>
+            {/* Auth Routes */}
+            <Route
+              path="/auth/login"
+              element={user ? <Navigate to="/swipe" /> : <Auth mode="login" user={user} />}
+            />
+            <Route
+              path="/auth/register"
+              element={user ? <Navigate to="/swipe" /> : <Auth mode="register" user={user} />}
+            />
 
-            {/* Гостевые страницы */}
-            <Route element={<GuestRoute user={user} />}>
-              <Route path="/auth/login" element={<Auth mode="login" />} />
-              <Route path="/auth/register" element={<Auth mode="register" />} />
-            </Route>
+            {/* Protected Swipe Route */}
+            <Route
+              path="/swipe"
+              element={
+                <ProtectedRoute>
+                  <SwipeScreen
+                    profile={profile}
+                    onLike={handleLike}
+                    onSkip={handleSkip}
+                    user={user}
+                  />
+                </ProtectedRoute>
+              }
+            />
 
-
-            {/* Защищённые страницы */}
-            <Route element={<ProtectedRoute user={user} />}>
-
-              <Route
-                path="/swipe"
-                element={
-                  !profile ? (
-                    <Navigate to="/finish" replace />
-                  ) : (
-                    <SwipeScreen
-                      profile={profile}
-                      onLike={handleLike}
-                      onSkip={handleSkip}
-                    />
-                  )
-                }
-              />
-
-              <Route
-                path="/finish"
-                element={
+            {/* Protected Finish Route */}
+            <Route
+              path="/finish"
+              element={
+                <ProtectedRoute>
                   <FinishScreen
                     matches={matches}
                     total={profiles.length}
                     onRestart={handleRestart}
+                    user={user}
                   />
-                }
-              />
-
-            </Route>
-
-
-            {/* Редирект по умолчанию */}
-            <Route
-              path="*"
-              element={<Navigate to={user ? "/swipe" : "/auth/login"} replace />}
+                </ProtectedRoute>
+              }
             />
 
+            {/* Default route */}
+            <Route
+              path="*"
+              element={user ? <Navigate to="/swipe" /> : <Navigate to="/auth/login" />}
+            />
           </Routes>
 
-          {user && <MatchList matches={matches} />}
-
+          {/* Match list always visible if user is logged in */}
+          {user && <MatchList matches={matches} user={user} />}
         </div>
       </div>
     </BrowserRouter>
   );
 }
 
-export default App;
+export default AppWrapper;

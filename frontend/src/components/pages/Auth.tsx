@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { WelcomeVideo } from '../ui/WelcomeVideo'
 import { useAuth } from '../../hooks/useAuth'
+import { useAuthContext } from '../../context/AuthContext';
 
 interface AuthProps {
   mode: 'login' | 'register'
@@ -9,8 +10,14 @@ interface AuthProps {
 
 export default function Auth({ mode }: AuthProps) {
   const navigate = useNavigate()
-  const { login, register, loading } = useAuth()
+  const { loading, user, login, register } = useAuthContext();
   const isLogin = mode === 'login'
+  
+  useEffect(() => {
+    if (user) {
+      navigate("/swipe", { replace: true });
+    }
+  }, [user, navigate]);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -68,10 +75,7 @@ export default function Auth({ mode }: AuthProps) {
         setError(result.error!)
         return
       }
-
     }
-
-    navigate('/swipe', {replace:true})
   }
 
   return (

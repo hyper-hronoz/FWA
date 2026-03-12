@@ -27,59 +27,70 @@ interface AuthResponse {
   token: string
 }
 
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // useEffect(() => {
-  //   checkAuth()
-  // }, [])
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const fake_login = () => {
+    const userToSave = {
+      username: "Анна Коваленко",
+      age: 18,
+      email: "anna.kovalenko@example.com",
+      createdAt: "2024-01-15T10:30:00.000Z"
+    }
+
+    localStorage.setItem('animeUser', JSON.stringify(userToSave))
+    setUser(userToSave)
+    setLoading(false)
+
+    return { success: true, user: userToSave }
+  }
 
   const checkAuth = async () => {
-    // const token = localStorage.getItem('animeToken')
-    // const savedUser = localStorage.getItem('animeUser')
-    //
-    // if (!token || !savedUser) {
-    //   setUser(null)
-    //   return
-    // }
-    //
-    // try {
-    //   setLoading(true)
-    //   const response = await fetch(`${API_BASE_URL}${ROUTES.auth.me}`, {
-    //     headers: { 'Authorization': `Bearer ${token}` }
-    //   })
-    //
-    //   if (response.ok) {
-    //     const userData = await response.json()
-    //     console.log(response)
-    //     console.log(userData)
-    //     setUser(userData)
-    //   } else {
-    //     localStorage.removeItem('animeToken')
-    //     localStorage.removeItem('animeUser')
-    //     setUser(null)
-    //   }
-    // } catch {
-    //   setUser(JSON.parse(savedUser))
-    // } finally {
-    //   setLoading(false)
-    // }
+    return fake_login();
 
-    // const userToSave = {
-    //   username: "Анна Коваленко",
-    //   age: 18,
-    //   email: "anna.kovalenko@example.com",
-    //   createdAt: "2024-01-15T10:30:00.000Z"
-    // }
-    //
-    // localStorage.setItem('animeUser', JSON.stringify(userToSave))
-    // setUser(userToSave)
-    // setLoading(false)
+    const token = localStorage.getItem('animeToken')
+    const savedUser = localStorage.getItem('animeUser')
+
+    if (!token || !savedUser) {
+      setUser(null)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await fetch(`${API_BASE_URL}${ROUTES.auth.me}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        const userData = await response.json()
+        console.log(response)
+        console.log(userData)
+        setUser(userData)
+      } else {
+        localStorage.removeItem('animeToken')
+        localStorage.removeItem('animeUser')
+        setUser(null)
+      }
+    } catch {
+      setUser(JSON.parse(savedUser))
+    } finally {
+      setLoading(false)
+    }
+
   }
 
   const login = async (data: LoginData) => {
+
+    return fake_login();
+
     try {
       setLoading(true)
       setError(null)
