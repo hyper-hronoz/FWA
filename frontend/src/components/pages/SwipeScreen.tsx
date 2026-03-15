@@ -1,13 +1,13 @@
 import { useEffect } from "react"
-import ProfileCard from "../profile/ProfileCard"
+import ChanCard from "../profile/ChanCard"
 import { useSwipe } from "../../hooks/useSwipe"
 import { WelcomeVideo } from "../ui/WelcomeVideo"
 
-export default function SwipeScreen({ profile, onLike, onSkip }) {
-  const { elementRef } = useSwipe({
-    onLike,
-    onSkip
-  })
+import type { Chan } from "../../types/Profile"
+import type { SwipeScreenProps } from "../../types/Swipe.ts"
+
+export default function SwipeScreen({ chan, onLike, onSkip }: SwipeScreenProps) {
+  const { elementRef } = useSwipe({ onLike, onSkip }, chan.id)
 
   useEffect(() => {
     console.log("📦 SwipeScreen mounted")
@@ -21,15 +21,15 @@ export default function SwipeScreen({ profile, onLike, onSkip }) {
         ref={elementRef}
         className="flex-1 flex items-center justify-center p-8"
       >
-        <ProfileCard
-          profile={profile}
+        <ChanCard
+          chan={chan}
           onLike={onLike}
           onSkip={onSkip}
         />
       </div>
 
       <div className="flex-1 relative min-h-screen">
-        <WelcomeVideo  videoSrc="../../../static/videos/index.mp4"/>
+        <WelcomeVideo videoSrc="../../../static/videos/index.mp4"/>
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 text-6xl animate-float">🌸</div>
@@ -39,7 +39,6 @@ export default function SwipeScreen({ profile, onLike, onSkip }) {
         </div>
 
       </div>
-
     </div>
   )
 }

@@ -1,9 +1,7 @@
-import type { Profile } from "../types/Profile"
 import { useState } from "react"
 
-interface MatchListProps {
-  matches: Profile[]
-}
+import type { Chan } from "../../types/Profile"
+import type { MatchListProps } from "../../types/Match.ts"
 
 export default function MatchList({ matches }: MatchListProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,24 +40,18 @@ export default function MatchList({ matches }: MatchListProps) {
                 className="flex items-center gap-3 p-3 bg-anime-background rounded-xl hover:bg-opacity-70 transition-all duration-300 transform hover:scale-105 hover:-translate-x-2 group border border-anime-primary border-opacity-20"
               >
                 <div className="relative">
-                  {match.image ? (
-                    <img
-                      src={match.image}
-                      alt={match.name}
-                      className="w-16 h-16 rounded-full object-cover border-4 border-anime-primary border-opacity-50 group-hover:border-opacity-100 transition-all duration-300"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-anime-primary to-anime-secondary flex items-center justify-center text-3xl">
-                      {match.gender === 'female' ? '🌸' : '⭐'}
-                    </div>
-                  )}
+                  <img
+                    src={match.avatar}
+                    alt={match.username}
+                    className="w-16 h-16 rounded-full object-cover border-4 border-anime-primary border-opacity-50 group-hover:border-opacity-100 transition-all duration-300"
+                  />
                   <span className="absolute -bottom-1 -right-1 text-2xl animate-bounce">
                     💕
                   </span>
                 </div>
                 <div className="flex-1">
                   <h4 className="text-anime-text font-bold font-anime flex items-center gap-1">
-                    {match.name}
+                    {match.username}
                     <span className="text-xs bg-anime-primary bg-opacity-30 px-2 py-1 rounded-full">
                       {match.age}
                     </span>

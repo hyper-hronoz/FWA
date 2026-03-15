@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 
 interface SwipeHandlers {
-  onLike?: () => void
-  onSkip?: () => void
+  onLike?: (profileId: number) => void
+  onSkip?: (profileId: number) => void
 }
 
-export const useSwipe = ({ onLike, onSkip }: SwipeHandlers) => {
+export const useSwipe = ({ onLike, onSkip }: SwipeHandlers, profileId: number) => {
   const [startX, setStartX] = useState<number | null>(null)
   const [offset, setOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -25,13 +25,11 @@ export const useSwipe = ({ onLike, onSkip }: SwipeHandlers) => {
     const diff = currentX - startX
     setOffset(diff)
     
-    // Визуальный эффект при свайпе
     if (elementRef.current) {
       const opacity = Math.min(Math.abs(diff) / threshold, 1)
       const rotate = diff * 0.1
       elementRef.current.style.transform = `translateX(${diff}px) rotate(${rotate}deg)`
       
-      // Показываем индикатор лайка/скипа
       if (diff > 0) {
         elementRef.current.style.boxShadow = `0 0 20px rgba(255, 77, 109, ${opacity})`
       } else {
@@ -47,13 +45,12 @@ export const useSwipe = ({ onLike, onSkip }: SwipeHandlers) => {
     
     if (Math.abs(diff) > threshold) {
       if (diff > 0 && onLike) {
-        onLike()
+        onLike(profileId)
       } else if (diff < 0 && onSkip) {
-        onSkip()
+        onSkip(profileId)
       }
     }
     
-    // Сброс позиции
     setStartX(null)
     setOffset(0)
     setIsDragging(false)

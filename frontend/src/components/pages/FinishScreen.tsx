@@ -1,7 +1,7 @@
-import type { Profile } from "../../types/Profile"
+import type { Chan } from "../../types/Profile"
 
 type Props = {
-  matches: Profile[]
+  matches: Chan[]
   total: number
   onRestart: () => void
 }

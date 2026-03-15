@@ -1,15 +1,8 @@
-// components/layout/Navbar.tsx
-
 import { useState } from "react"
 import ProgressBar from "../ui/ProgressBar"
-import type { User } from "../../types/Profile"
 
-interface NavbarProps {
-  user: User
-  currentIndex: number
-  totalProfiles: number
-  onLogout: () => void
-}
+import type { User } from "../../types/Profile"
+import type { NavbarProps } from "../../types/Navbar"
 
 export default function Navbar({
   user,
@@ -47,7 +40,7 @@ export default function Navbar({
 
             {/* Username */}
             <span className="hidden sm:inline text-anime-textSoft font-cute">
-              {user.name}
+              {user.username}
             </span>
 
             {/* Avatar */}
@@ -72,7 +65,7 @@ export default function Navbar({
                   <div className="px-4 py-3 bg-gradient-to-r from-anime-primary to-anime-secondary bg-opacity-20">
                     <p className="text-sm text-anime-textSoft">Online</p>
                     <p className="font-bold font-anime text-anime-text">
-                      {user.name}
+                      {user.username}
                     </p>
                   </div>
 

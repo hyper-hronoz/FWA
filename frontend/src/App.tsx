@@ -14,38 +14,30 @@ import MatchList from "./components/profile/MatchList";
 
 import { useAuth } from "./hooks/useAuth";
 
+import { AuthProvider, useAuthContext } from './context/AuthContext';
 
-// --- Только для авторизованных ---
-function ProtectedRoute({ user }) {
-  if (!user) {
-    return <Navigate to="/auth/login" replace />;
-  }
+import {ProtectedRoute, GuestRoute } from "./routing/ProtectedRoute";
+import type { Chan, User } from "./types/Profile"
 
-  return <Outlet />;
+function AppWrapper() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
 }
-
-
-// --- Только для гостей ---
-function GuestRoute({ user }) {
-  if (user) {
-    return <Navigate to="/swipe" replace />;
-  }
-
-  return <Outlet />;
-}
-
 
 function App() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
 
   const [index, setIndex] = useState(0);
-  const [matches, setMatches] = useState([]);
+  const [matches, setMatches] = useState<Chan[]>([]);
 
-  const profile = profiles[index];
-
+  const profile: Chan | undefined = profiles[index];
   const next = () => setIndex((prev) => prev + 1);
 
   const handleLike = () => {
+    if (!profile) return;
     setMatches((prev) => [...prev, profile]);
     next();
   };
@@ -69,36 +61,27 @@ function App() {
           {user && (
             <Navbar
               user={user}
-              index={index}
-              total={profiles.length}
+              currentIndex={index}
+              totalProfiles={profiles.length}
               onLogout={logout}
             />
           )}
 
           <Routes>
-
-            {/* Гостевые страницы */}
-            <Route element={<GuestRoute user={user} />}>
+            <Route element={<GuestRoute/>}>
               <Route path="/auth/login" element={<Auth mode="login" />} />
               <Route path="/auth/register" element={<Auth mode="register" />} />
             </Route>
 
-
-            {/* Защищённые страницы */}
-            <Route element={<ProtectedRoute user={user} />}>
-
+            <Route element={<ProtectedRoute/>}>
               <Route
                 path="/swipe"
                 element={
-                  !profile ? (
-                    <Navigate to="/finish" replace />
-                  ) : (
-                    <SwipeScreen
-                      profile={profile}
-                      onLike={handleLike}
-                      onSkip={handleSkip}
-                    />
-                  )
+                  <SwipeScreen
+                    chan={profile}
+                    onLike={handleLike}
+                    onSkip={handleSkip}
+                  />
                 }
               />
 
@@ -115,8 +98,6 @@ function App() {
 
             </Route>
 
-
-            {/* Редирект по умолчанию */}
             <Route
               path="*"
               element={<Navigate to={user ? "/swipe" : "/auth/login"} replace />}
@@ -132,4 +113,5 @@ function App() {
   );
 }
 
-export default App;
+export default AppWrapper;
+

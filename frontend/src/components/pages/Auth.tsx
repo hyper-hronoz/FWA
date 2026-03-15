@@ -2,14 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { WelcomeVideo } from '../ui/WelcomeVideo'
 import { useAuth } from '../../hooks/useAuth'
+import { useAuthContext } from '../../context/AuthContext'
 
-interface AuthProps {
-  mode: 'login' | 'register'
-}
+import type { AuthProps } from '../../types/Auth.ts'
 
 export default function Auth({ mode }: AuthProps) {
   const navigate = useNavigate()
-  const { login, register, loading } = useAuth()
+   const { login, register, loading } = useAuthContext()
   const isLogin = mode === 'login'
 
   const [formData, setFormData] = useState({
@@ -20,7 +19,7 @@ export default function Auth({ mode }: AuthProps) {
     confirmPassword: ''
   })
 
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,10 +64,13 @@ export default function Auth({ mode }: AuthProps) {
       })
 
       if (!result.success) {
-        setError(result.error!)
+        if ('error' in result && result.error) {
+          setError(result.error)
+        } else {
+          setError('Произошла неизвестная ошибка при входе')
+        }
         return
       }
-
     }
 
     navigate('/swipe', {replace:true})
