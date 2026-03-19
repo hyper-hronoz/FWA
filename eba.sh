@@ -1,1 +1,1 @@
-docker compose -f ~./frontend/docker-compose.yml -f ./backend/docker-compose.yml up --build
+docker compose -f ./frontend/docker-compose.yml -f ./backend/docker-compose.yml up --build
