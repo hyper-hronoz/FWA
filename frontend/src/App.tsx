@@ -3,21 +3,23 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 
 import { profiles } from "./data/profiles";
 
-import Auth from "./components/pages/Auth";
+import Auth   from "./components/pages/Auth";
 import Navbar from "./components/layout/Navbar";
 import BackgroundEffects from "./components/layout/BackgroundEffects";
 
 import FinishScreen from "./components/pages/FinishScreen";
-import SwipeScreen from "./components/pages/SwipeScreen";
+import SwipeScreen  from "./components/pages/SwipeScreen";
 
-import MatchList from "./components/profile/MatchList";
+import MatchList  from "./components/profile/MatchList";
+import AdminPanel from "./components/admin/AdminPanel";
 
 import { useAuth } from "./hooks/useAuth";
 
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 
-import {ProtectedRoute, GuestRoute } from "./routing/ProtectedRoute";
-import type { Chan, User } from "./types/Profile"
+import { ProtectedRoute, GuestRoute, AdminRoute } from "./routing/ProtectedRoute";
+
+import type { Chan, User } from "@shared/Profile"
 
 function AppWrapper() {
   return (
@@ -32,9 +34,25 @@ function App() {
 
   const [index, setIndex] = useState(0);
   const [matches, setMatches] = useState<Chan[]>([]);
+  const [availableProfiles, setAvailableProfiles] = useState<Chan[]>(profiles);
 
   const profile: Chan | undefined = profiles[index];
-  const next = () => setIndex((prev) => prev + 1);
+
+  const next = () => {
+    setIndex((prev) => {
+      if (availableProfiles.length === 0) return prev;
+
+      const newIndex = prev + 1;
+
+      if (newIndex >= profiles.length) {
+        console.log("FUCK")
+        alert("🎉 Поздравляем! Вы просмотрели всех тянок! Хотите еще? 👀");
+        return prev;
+      }
+
+      return newIndex;
+    });
+  };
 
   const handleLike = () => {
     if (!profile) return;
@@ -49,6 +67,11 @@ function App() {
   const handleRestart = () => {
     setIndex(0);
     setMatches([]);
+  };
+
+  const handleProfilesChange = (newProfiles: Chan[]) => {
+    setAvailableProfiles(newProfiles);
+    setIndex(0);
   };
 
   return (
@@ -68,6 +91,7 @@ function App() {
           )}
 
           <Routes>
+
             <Route element={<GuestRoute/>}>
               <Route path="/auth/login" element={<Auth mode="login" />} />
               <Route path="/auth/register" element={<Auth mode="register" />} />
@@ -95,7 +119,18 @@ function App() {
                   />
                 }
               />
+            </Route>
 
+            <Route element={<AdminRoute/>}>
+              <Route
+                path="/admin"
+                element={
+                  <AdminPanel
+                    initialProfiles={profiles}
+                    onProfilesChange={handleProfilesChange}
+                  />
+                }
+              />
             </Route>
 
             <Route

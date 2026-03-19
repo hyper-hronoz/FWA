@@ -1,13 +1,4 @@
-export interface Chan {
-  id: number
-  username: string
-  age: number
-  bio: string
-  interests: string[]
-  avatar: string
-  video: string
-  favoriteAnime: string
-}
+import type { Chan } from "@shared/Profile"
 
 export interface ChanCardProps {
   chan: Chan
@@ -15,11 +6,3 @@ export interface ChanCardProps {
   onSkip: (profileId: number) => void
 }
 
-export interface User {
-  id: string
-  email: string 
-  username: string
-  age: number
-  avatar?: string
-  createdAt?: string
-}

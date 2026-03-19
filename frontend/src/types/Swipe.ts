@@ -1,4 +1,4 @@
-import type { Chan } from "./Profile"
+import type { Chan } from "@shared/Profile"
 
 export interface SwipeScreenProps {
   chan: Chan

@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom" 
 import ProgressBar from "../ui/ProgressBar"
 
-import type { User } from "../../types/Profile"
+import type { User } from "@shared/Profile"
 import type { NavbarProps } from "../../types/Navbar"
 
 export default function Navbar({
@@ -11,19 +12,27 @@ export default function Navbar({
   onLogout
 }: NavbarProps) {
   const [showMenu, setShowMenu] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    console.log('User updated in Navbar:', user)
+    console.log('name:', user.age)
+    console.log('is_admin value:', user?.is_admin)
+  }, [user])
 
   return (
     <nav className="bg-anime-card bg-opacity-80 backdrop-blur-lg border-b border-anime-primary border-opacity-30 sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
 
-        {/* Logo */}
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-anime-primary via-pink-400 to-anime-secondary bg-clip-text text-transparent font-anime animate-pulse-glow">
+        <h1 
+          onClick={() => navigate("/")}
+          className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-anime-primary via-pink-400 to-anime-secondary bg-clip-text text-transparent font-anime animate-pulse-glow cursor-pointer hover:opacity-80 transition-opacity duration-300"
+        >
           Anime Love
         </h1>
 
         <div className="flex items-center gap-4 md:gap-6">
 
-          {/* Desktop Progress */}
           <div className="hidden md:block">
             <ProgressBar
               currentIndex={currentIndex}
@@ -31,7 +40,6 @@ export default function Navbar({
             />
           </div>
 
-          {/* Mobile Progress */}
           <div className="md:hidden text-anime-textSoft text-sm">
             {currentIndex + 1}/{totalProfiles}
           </div>
@@ -76,9 +84,20 @@ export default function Navbar({
                     }}
                     className="w-full px-4 py-3 text-left text-anime-text hover:bg-anime-background transition-colors duration-300 flex items-center gap-2 font-cute group"
                   >
-                    <span className="group-hover:animate-spin">🚪</span>
                     Logout
                   </button>
+
+                  {user["is_admin"] === true && (
+                    <button
+                      onClick={() => {
+                        navigate("/admin")
+                        setShowMenu(false)
+                      }}
+                      className="w-full px-4 py-3 text-left text-anime-text hover:bg-anime-background transition-colors duration-300 flex items-center gap-2 font-cute group border-t border-anime-primary border-opacity-20"
+                    >
+                      Admin Panel
+                    </button>
+                  )}
 
                 </div>
               )}

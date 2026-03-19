@@ -1,4 +1,4 @@
-import type { User } from "./Profile"
+import type { User } from "@shared/Profile"
 
 export interface NavbarProps {
   user: User

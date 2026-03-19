@@ -1,4 +1,4 @@
-import type { Chan } from "../../types/Profile"
+import type { Chan } from "@shared/Profile"
 
 type Props = {
   matches: Chan[]

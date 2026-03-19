@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { API_BASE_URL, ROUTES } from '../config/api'
 
-import type { LoginData, RegisterData, AuthResponse } from '../types/Auth'
-import type { User } from '../types/Profile'
+import type { User } from '@shared/Profile'
+import type { LoginData, RegisterData, AuthResponse } from "@shared/Auth"
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -19,7 +19,8 @@ export function useAuth() {
       username: "Анна Коваленко",
       age: 18,
       email: "anna.kovalenko@example.com",
-      createdAt: "2024-01-15T10:30:00.000Z"
+      createdAt: "2024-01-15T10:30:00.000Z",
+      is_admin: true
     }
 
     localStorage.setItem('animeToken', JSON.stringify('token-sdfksdkfj-token'))
@@ -43,6 +44,14 @@ export function useAuth() {
 
     const token = localStorage.getItem('animeToken')
     const savedUser = localStorage.getItem('animeUser')
+
+    // s remove
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      return;
+    }
+    return;
+    // e remove
 
     if (!token || !savedUser) {
       setUser(null)

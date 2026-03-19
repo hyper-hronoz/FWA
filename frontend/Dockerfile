@@ -1,31 +1,23 @@
-# Stage 1: build React app
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Копируем package.json и package-lock.json
-COPY package*.json ./
+COPY frontend/package*.json ./
 
-# Устанавливаем зависимости
+COPY shared ./shared
+
 RUN npm install
 
-# Копируем весь код
-COPY . .
+COPY frontend/ .
 
-# Собираем React приложение
 RUN npm run build
 
-# Stage 2: serve with Nginx
 FROM nginx:alpine
-
-# Копируем билд в папку Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/static /usr/share/nginx/html/static
+RUN mkdir -p /usr/share/nginx/html/videos
+COPY ./backend/static/videos /usr/share/nginx/html/videos
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-# Копируем конфиг Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Экспонируем порт
 EXPOSE 80
-
-# Запуск Nginx на переднем плане
 CMD ["nginx", "-g", "daemon off;"]

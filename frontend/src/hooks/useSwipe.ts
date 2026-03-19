@@ -11,7 +11,7 @@ export const useSwipe = ({ onLike, onSkip }: SwipeHandlers, profileId: number) =
   const [isDragging, setIsDragging] = useState(false)
   const elementRef = useRef<HTMLDivElement>(null)
 
-  const threshold = 100 // минимальное расстояние для свайпа
+  const threshold = 100
 
   const handleTouchStart = (e: TouchEvent) => {
     setStartX(e.touches[0].clientX)

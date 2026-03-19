@@ -1,5 +1,7 @@
 import { useState } from "react"
-import type { Chan, ChanCardProps } from "../../types/Profile"
+
+import type { Chan } from "@shared/Profile"
+import type { ChanCardProps } from "../../types/Profile"
 
 export default function ChanCard({
   chan,

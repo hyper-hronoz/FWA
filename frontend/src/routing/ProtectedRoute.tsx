@@ -13,23 +13,28 @@ export const ProtectedRoute = () => {
   return <Outlet />;
 };
 
-export const ProtectedRouteWithChildren = ({ children, redirectTo = "/auth/login" }: { 
-  children: React.ReactNode; 
-  redirectTo?: string;
-}) => {
-  const { user } = useAuthContext();
-
-  if (!user) {
-    return <Navigate to={redirectTo} replace />;
-  }
-
-  return <>{children}</>;
-};
-
 export const GuestRoute = () => {
   const { user } = useAuthContext();
 
   if (user) {
+    return <Navigate to="/swipe" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export const AdminRoute = () => {
+  const { user } = useAuthContext();
+  
+  console.log("AdminRoute - user from context:", user);
+
+  if (!user) {
+    console.log("AdminRoute - no user, redirecting to login");
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  if (!user.is_admin) {
+    console.log("AdminRoute - not admin, redirecting to swipe");
     return <Navigate to="/swipe" replace />;
   }
 
