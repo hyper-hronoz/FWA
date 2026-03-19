@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 import { profiles } from "./data/profiles";
 
@@ -7,13 +7,17 @@ import Auth from "./components/pages/Auth";
 import Navbar from "./components/layout/Navbar";
 import BackgroundEffects from "./components/layout/BackgroundEffects";
 
-import SwipeScreen from "./components/pages/SwipeScreen";
 import FinishScreen from "./components/pages/FinishScreen";
+import SwipeScreen from "./components/pages/SwipeScreen";
 
 import MatchList from "./components/profile/MatchList";
 
-import ProtectedRoute from "./routing/ProtectedRoute";
+import { useAuth } from "./hooks/useAuth";
+
 import { AuthProvider, useAuthContext } from './context/AuthContext';
+
+import {ProtectedRoute, GuestRoute } from "./routing/ProtectedRoute";
+import type { Chan, User } from "./types/Profile"
 
 function AppWrapper() {
   return (
@@ -27,14 +31,13 @@ function App() {
   const { user, logout } = useAuthContext();
 
   const [index, setIndex] = useState(0);
-  const [matches, setMatches] = useState([]);
+  const [matches, setMatches] = useState<Chan[]>([]);
 
-  const profile = profiles[index];
-
+  const profile: Chan | undefined = profiles[index];
   const next = () => setIndex((prev) => prev + 1);
 
   const handleLike = () => {
-    if (!user) return;
+    if (!profile) return;
     setMatches((prev) => [...prev, profile]);
     next();
   };
@@ -54,66 +57,56 @@ function App() {
         <BackgroundEffects />
 
         <div className="app-container">
-          {/* Navbar only shows when user is logged in */}
+
           {user && (
             <Navbar
               user={user}
-              index={index}
-              total={profiles.length}
+              currentIndex={index}
+              totalProfiles={profiles.length}
               onLogout={logout}
             />
           )}
 
           <Routes>
-            {/* Auth Routes */}
-            <Route
-              path="/auth/login"
-              element={user ? <Navigate to="/swipe" /> : <Auth mode="login" user={user} />}
-            />
-            <Route
-              path="/auth/register"
-              element={user ? <Navigate to="/swipe" /> : <Auth mode="register" user={user} />}
-            />
+            <Route element={<GuestRoute/>}>
+              <Route path="/auth/login" element={<Auth mode="login" />} />
+              <Route path="/auth/register" element={<Auth mode="register" />} />
+            </Route>
 
-            {/* Protected Swipe Route */}
-            <Route
-              path="/swipe"
-              element={
-                <ProtectedRoute>
+            <Route element={<ProtectedRoute/>}>
+              <Route
+                path="/swipe"
+                element={
                   <SwipeScreen
-                    profile={profile}
+                    chan={profile}
                     onLike={handleLike}
                     onSkip={handleSkip}
-                    user={user}
                   />
-                </ProtectedRoute>
-              }
-            />
+                }
+              />
 
-            {/* Protected Finish Route */}
-            <Route
-              path="/finish"
-              element={
-                <ProtectedRoute>
+              <Route
+                path="/finish"
+                element={
                   <FinishScreen
                     matches={matches}
                     total={profiles.length}
                     onRestart={handleRestart}
-                    user={user}
                   />
-                </ProtectedRoute>
-              }
-            />
+                }
+              />
 
-            {/* Default route */}
+            </Route>
+
             <Route
               path="*"
-              element={user ? <Navigate to="/swipe" /> : <Navigate to="/auth/login" />}
+              element={<Navigate to={user ? "/swipe" : "/auth/login"} replace />}
             />
+
           </Routes>
 
-          {/* Match list always visible if user is logged in */}
-          {user && <MatchList matches={matches} user={user} />}
+          {user && <MatchList matches={matches} />}
+
         </div>
       </div>
     </BrowserRouter>
@@ -121,3 +114,4 @@ function App() {
 }
 
 export default AppWrapper;
+

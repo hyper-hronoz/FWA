@@ -1,32 +1,8 @@
 import { useState, useEffect } from 'react'
 import { API_BASE_URL, ROUTES } from '../config/api'
 
-interface User {
-  id: string
-  username: string
-  age: number
-  email: string
-  avatar?: string
-  createdAt?: string
-}
-
-interface LoginData {
-  email: string
-  password: string
-}
-
-interface RegisterData {
-  username: string
-  age: number
-  email: string
-  password: string
-}
-
-interface AuthResponse {
-  user: User
-  token: string
-}
-
+import type { LoginData, RegisterData, AuthResponse } from '../types/Auth'
+import type { User } from '../types/Profile'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -39,21 +15,31 @@ export function useAuth() {
 
   const fake_login = () => {
     const userToSave = {
+      id: "1",
       username: "Анна Коваленко",
       age: 18,
       email: "anna.kovalenko@example.com",
       createdAt: "2024-01-15T10:30:00.000Z"
     }
 
+    localStorage.setItem('animeToken', JSON.stringify('token-sdfksdkfj-token'))
     localStorage.setItem('animeUser', JSON.stringify(userToSave))
+
     setUser(userToSave)
     setLoading(false)
 
     return { success: true, user: userToSave }
   }
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) return error.message
+    if (typeof error === 'string') return error
+    return 'An unknown error occurred'
+  }
+
   const checkAuth = async () => {
-    return fake_login();
+    // Comment out fake login for production
+    // return fake_login();
 
     const token = localStorage.getItem('animeToken')
     const savedUser = localStorage.getItem('animeUser')
@@ -80,15 +66,20 @@ export function useAuth() {
         setUser(null)
       }
     } catch {
-      setUser(JSON.parse(savedUser))
+      try {
+        const parsedUser = JSON.parse(savedUser as string) as User
+        setUser(parsedUser)
+      } catch (parseError) {
+        console.error('Failed to parse saved user:', parseError)
+        setUser(null)
+      }
     } finally {
       setLoading(false)
     }
-
   }
 
   const login = async (data: LoginData) => {
-
+    // Comment out fake login for production
     return fake_login();
 
     try {
@@ -117,7 +108,7 @@ export function useAuth() {
 
       return { success: true, user: result.user }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ошибка при входе'
+      const message = getErrorMessage(err)
       setError(message)
       return { success: false, error: message }
     } finally {
@@ -156,8 +147,10 @@ export function useAuth() {
     }
   }
 
+  
   const logout = async () => {
     try {
+      console.log("logout triggered hook")
       // pass
     } finally {
       localStorage.removeItem('animeToken')
@@ -165,6 +158,7 @@ export function useAuth() {
       setUser(null)
     }
   }
+
 
   const updateProfile = async (data: Partial<User>) => {
     try {
@@ -194,29 +188,11 @@ export function useAuth() {
 
       return { success: true, user: updatedUser }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ошибка при обновлении'
+      const message = getErrorMessage(err)
       setError(message)
       return { success: false, error: message }
     } finally {
       setLoading(false)
-    }
-  }
-
-   const debugNavigate = (page: keyof typeof ROUTES | string) => {
-    if (typeof page === 'string') {
-      window.location.href = page
-      return
-    }
-
-    // Если передан ключ из ROUTES
-    if (page === 'auth') {
-      window.location.href = `${API_BASE_URL}${ROUTES.auth.login}`
-      return
-    }
-
-    if (page === 'users') {
-      window.location.href = `${API_BASE_URL}${ROUTES.users.profile}`
-      return
     }
   }
 

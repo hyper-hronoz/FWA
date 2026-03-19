@@ -1,9 +1,11 @@
+import type { Chan } from "../types/Profile"
+
 export function useNotifications() {
-  const notifyLike = (profile) => {
+  const notifyLike = (chan: Chan) => {
     if (Notification.permission === "granted") {
       new Notification("Новый лайк ❤️", {
-        body: `Ты лайкнул ${profile.name}`,
-        icon: profile.image
+        body: `Ты лайкнул ${chan.username}`,
+        icon: chan.avatar
       })
     }
   }
