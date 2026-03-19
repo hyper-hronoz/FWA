@@ -1,5 +1,4 @@
 CREATE DATABASE IF NOT EXISTS anime_dating;
-
 USE anime_dating;
 
 CREATE TABLE users (
@@ -12,14 +11,25 @@ CREATE TABLE users (
 
 CREATE TABLE girls (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL,
     age INT NOT NULL,
-    description TEXT
+    video VARCHAR(255),
+    avatar VARCHAR(255),
+    bio TEXT,
+    favorite_anime VARCHAR(100)
 );
 
 CREATE TABLE hobbies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE girl_hobbies (
+    girl_id INT,
+    hobby_id INT,
+    PRIMARY KEY (girl_id, hobby_id),
+    FOREIGN KEY (girl_id) REFERENCES girls(id) ON DELETE CASCADE,
+    FOREIGN KEY (hobby_id) REFERENCES hobbies(id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_girl_likes (
