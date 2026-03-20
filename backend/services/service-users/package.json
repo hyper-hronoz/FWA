@@ -1,5 +1,5 @@
 {
-  "name": "service-girls",
+  "name": "service-users",
   "version": "1.0.0",
   "description": "Backend для проекта Anime Dating с микросервисами, TypeScript, JWT, MySQL и Swagger",
   "main": "index.js",

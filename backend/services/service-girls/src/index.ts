@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/authRoutes";
+import girlRoutes from "./routes/girlRoutes";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./swagger/swagger";
 
@@ -11,19 +11,23 @@ app.use(express.json());
 
 
 app.get("/", (req, res) => {
-  res.send("Auth service is running");
+  res.send("Girls service is running");
 });
+
 
 app.get("/docs-json", (req, res) => {
   res.json(swaggerSpec);
 });
 
-app.use("/auth", authRoutes);
+
+app.use("/girls", girlRoutes);
+
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const PORT = 3001;
+
+const PORT = 3002;
 
 app.listen(PORT, () => {
-  console.log(`Auth service running on port ${PORT}`);
+  console.log(`Girls service running on port ${PORT}`);
 });
