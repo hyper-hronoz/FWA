@@ -1,38 +1,47 @@
 USE anime_dating;
 
-INSERT INTO girls (username, age, video, avatar, bio, favorite_anime) VALUES
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
+INSERT INTO girls (username, age, video, avatar, bio, interests, favorite_anime) VALUES
 ('Мику', 18,
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
- 'https://i.pinimg.com/564x/3a/7b/3c/3a7b3c5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
+ '/videos/test1.mp4',
+ '/avatars/avatar1.jpg',
  'Люблю петь и играть на синтезаторе! Ищу того, кто оценит мою музыку 🎵',
+ '["Музыка", "Аниме", "Косплей"]',
  'Vocaloid'),
 
 ('Сакура', 19,
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
- 'https://i.pinimg.com/564x/4b/8c/2d/4b8c2d5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
+ '/videos/test2.mp4',
+ '/avatars/avatar2.jpg',
  'Цветущая сакура и сладости - моя страсть. Ищу того, с кем можно разделить сладкие моменты 🍡',
+ '["Сладости", "Фотография", "Природа"]',
  'Cardcaptor Sakura'),
 
 ('Рен', 20,
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
- 'https://i.pinimg.com/564x/5c/9d/3e/5c9d3e5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
+ '/videos/test3.mp4',
+ '/avatars/avatar3.jpg',
  'Косплеер и любитель аниме. Могу говорить цитатами из Наруто часами!',
+ '["Косплей", "Манга", "Игры"]',
  'Naruto'),
 
 ('Асуна', 17,
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
- 'https://i.pinimg.com/564x/6d/ae/4f/6dae4f5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
+ '/videos/test1.mp4',
+ '/avatars/avatar4.jpg',
  'Готовлю лучше всех в Айнкраде! Ищу своего героя ⚔️',
+ '["Готовка", "VR", "Мечи"]',
  'Sword Art Online'),
 
 ('Леви', 22,
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
- 'https://i.pinimg.com/564x/7e/bf/5a/7ebf5a5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
+ '/videos/test2.mp4',
+ '/avatars/avatar5.jpg',
  'Чистота - залог здоровья. Ищу того, кто не боится уборки 🧹',
+ '["Чистота", "Чай", "Разведка"]',
  'Attack on Titan'),
 
 ('Румия', 18,
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
- 'https://i.pinimg.com/564x/8f/cd/6b/8fcd6b5f5b5c5b5c5b5c5b5c5b5c5b5c.jpg',
+ '/videos/test3.mp4',
+ '/avatars/avatar6.jpg',
  'Тусуюсь в Сиббуе, ищу компанию для фотосессий и шопинга 🛍️',
+ '["Мода", "Фото", "Тусовки"]',
  'NANA');
