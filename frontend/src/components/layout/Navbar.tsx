@@ -6,7 +6,6 @@ import type { NavbarProps } from "../../types/Navbar"
 
 export default function Navbar({
   user,
-  currentIndex,
   totalProfiles,
   onLogout
 }: NavbarProps) {
@@ -17,7 +16,6 @@ export default function Navbar({
     <nav className="bg-anime-card bg-opacity-80 backdrop-blur-lg border-b border-anime-primary border-opacity-30 sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
 
-        {/* Логотип */}
         <h1 
           onClick={() => navigate("/")}
           className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-anime-primary via-pink-400 to-anime-secondary bg-clip-text text-transparent font-anime animate-pulse-glow cursor-pointer hover:opacity-80 transition-opacity duration-300"
@@ -55,13 +53,6 @@ export default function Navbar({
 
               {showMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-anime-card rounded-xl overflow-hidden shadow-2xl border border-anime-primary border-opacity-30 animate-slide-up z-50">
-
-                  <div className="px-4 py-3 bg-gradient-to-r from-anime-primary to-anime-secondary bg-opacity-20">
-                    <p className="font-bold font-anime text-anime-text">
-                      {user.username}
-                    </p>
-                  </div>
-
                   <button
                     onClick={() => {
                       onLogout()

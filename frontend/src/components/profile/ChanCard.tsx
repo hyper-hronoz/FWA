@@ -12,7 +12,8 @@ export default function ChanCard({
 
   const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    onLike(chan.id)
+    if (!onLike) return
+    onLike(chan)
 
     const heart = document.createElement("div")
     heart.innerHTML = "❤️"
@@ -27,7 +28,8 @@ export default function ChanCard({
 
   const handleSkipClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    onSkip(chan.id)
+    if (!onSkip) return
+    onSkip(chan)
   }
 
   return (
@@ -95,24 +97,24 @@ export default function ChanCard({
         )}
 
         <div className="flex justify-center gap-6 mt-6">
-          <button
-            onClick={handleSkipClick}
-            className="bg-red-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl transition hover:scale-110 shadow-xl"
-          >
-            ✕
-          </button>
+          {onSkip && (
+            <button
+              onClick={handleSkipClick}
+              className="bg-red-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl transition hover:scale-110 shadow-xl"
+            >
+              ✕
+            </button>
+          )}
 
-          <button
-            onClick={handleLikeClick}
-            className="bg-gradient-to-r from-anime-primary to-anime-secondary text-white w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl transition hover:scale-110 animate-pulse-glow"
-          >
-            ❤️
-          </button>
+          {onLike && (
+            <button
+              onClick={handleLikeClick}
+              className="bg-gradient-to-r from-anime-primary to-anime-secondary text-white w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl transition hover:scale-110 animate-pulse-glow"
+            >
+              ❤️
+            </button>
+          )}
         </div>
-
-        <p className="text-center mt-4 text-anime-textSoft text-sm">
-          👉 Свайп вправо — лайк, влево — пропуск
-        </p>
       </div>
     </div>
   )

@@ -2,7 +2,7 @@ import type { Chan } from "@shared/Profile"
 
 export interface ChanCardProps {
   chan: Chan
-  onLike: (profileId: number) => void
-  onSkip: (profileId: number) => void
+  onLike?: (chan: Chan) => void
+  onSkip?: (chan: Chan) => void
 }
 

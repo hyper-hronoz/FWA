@@ -1,9 +1,11 @@
+import { API_BASE_URL, ROUTES } from "../config/api";
+
 import { useState, useEffect } from "react";
 import { useAuthContext } from "../context/AuthContext";
-import { API_BASE_URL, ROUTES } from "../config/api";
+
 import type { Chan } from "@shared/Profile";
 
-export function useLikedProfiles() {
+export function useLiked() {
   const { user } = useAuthContext();
   const [likedProfiles, setLikedProfiles] = useState<Chan[]>([]);
   const [loading, setLoading] = useState(true);

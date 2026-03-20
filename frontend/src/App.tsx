@@ -14,7 +14,7 @@ import Liked from "./components/pages/Liked";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { ProtectedRoute, GuestRoute, AdminRoute } from "./routing/ProtectedRoute";
 
-import { useSwipeLogic } from "./hooks/useSwipeLogic";
+import { useChan } from "./hooks/useChan.ts";
 
 function AppWrapper() {
   return (
@@ -28,16 +28,15 @@ function App() {
   const { user, logout } = useAuthContext();
 
   const {
-    profile,
-    index,
+    availableProfiles,
     matches,
     likedProfiles,
     loading,
-    total,
     handleLike,
     handleSkip,
     handleRestart,
-  } = useSwipeLogic();
+    refetch
+  } = useChan();
 
   return (
     <BrowserRouter>
@@ -48,8 +47,7 @@ function App() {
           {user && (
             <Navbar
               user={user}
-              currentIndex={index}
-              totalProfiles={total}
+              totalProfiles={availableProfiles.length}
               onLogout={logout}
             />
           )}
@@ -65,9 +63,10 @@ function App() {
                 path="/swipe"
                 element={
                   <SwipeScreen
-                    chan={profile}
+                    chan={availableProfiles[0]}
                     onLike={handleLike}
                     onSkip={handleSkip}
+                    refetch={refetch}
                   />
                 }
               />
@@ -87,7 +86,7 @@ function App() {
                 element={
                   <FinishScreen
                     matches={matches}
-                    total={total}
+                    total={availableProfiles.length}
                     onRestart={handleRestart}
                   />
                 }

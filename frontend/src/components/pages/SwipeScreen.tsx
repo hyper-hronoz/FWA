@@ -1,16 +1,54 @@
-import { useEffect } from "react"
 import ChanCard from "../profile/ChanCard"
-import { useSwipe } from "../../hooks/useSwipe"
+
+import { useEffect, useRef } from "react"
 import { WelcomeVideo } from "../ui/WelcomeVideo"
 
 import type { Chan } from "@shared/Profile"
-import type { SwipeScreenProps } from "../../types/Swipe.ts"
+import type { ChanCardProps } from "../../types/Profile"
 
-export default function SwipeScreen({ chan, onLike, onSkip }: SwipeScreenProps) {
-  const { elementRef } = useSwipe({ onLike, onSkip }, chan?.id)
+export default function SwipeScreen({ chan, onLike, onSkip, refetch }: ChanCardProps & { refetch: () => void }) {
+  const elementRef = useRef<HTMLDivElement>(null)
+  const hasRetried = useRef(false);
+
+  useEffect(() => {
+    if (!chan && !hasRetried.current) {
+      console.log("No more profiles, retrying fetch...");
+      hasRetried.current = true;
+      refetch();
+    }
+  }, [chan, refetch]);
 
   if (!chan) {
-    return <div>No profiles available</div>;
+  return (
+      <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-anime-background to-purple-900 text-center px-6 relative overflow-hidden">
+
+        <div className="bg-anime-card bg-opacity-80 backdrop-blur-xl border border-anime-primary border-opacity-30 rounded-3xl p-10 shadow-2xl animate-slide-up max-w-lg">
+          
+          <div className="text-7xl mb-4 animate-bounce">🎉</div>
+
+          <h1 className="text-4xl font-bold text-anime-text font-anime mb-4">
+            Омэдэто! 🎊
+          </h1>
+
+          <p className="text-anime-textSoft text-lg mb-6">
+            Ты собрал всех аниме-тян в этом мире...
+          </p>
+
+          <p className="text-anime-textSoft italic mb-6">
+            🫠 Похоже, ты слишком хорош...  
+            Даже сенпай уже заметил тебя...
+          </p>
+
+          <div className="text-2xl animate-pulse">
+            ❤️✨
+          </div>
+
+          <p className="mt-6 text-sm text-anime-textSoft">
+            Попробуй зайти позже — новые тянки обязательно появятся 👀
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -28,13 +66,6 @@ export default function SwipeScreen({ chan, onLike, onSkip }: SwipeScreenProps) 
 
       <div className="flex-1 relative min-h-screen">
         <WelcomeVideo videoSrc={chan.video}/>
-
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 text-6xl animate-float">🌸</div>
-          <div className="absolute bottom-20 right-10 text-6xl animate-float delay-1000">✨</div>
-          <div className="absolute top-40 right-20 text-4xl animate-spin-slow">🎀</div>
-          <div className="absolute bottom-40 left-20 text-5xl animate-bounce-slow">⭐</div>
-        </div>
       </div>
     </div>
   )

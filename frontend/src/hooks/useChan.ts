@@ -1,17 +1,16 @@
 import { API_BASE_URL, ROUTES } from "../config/api";
 import { useEffect, useState } from "react";
-import type { Chan } from "@shared/Profile";
 import { useAuthContext } from "../context/AuthContext";
 
-export function useSwipeLogic() {
+import type { Chan } from "@shared/Profile";
+
+export function useChan() {
   const { user } = useAuthContext();
-  const [index, setIndex] = useState(0);
+
   const [matches, setMatches] = useState<Chan[]>([]);
   const [availableProfiles, setAvailableProfiles] = useState<Chan[]>([]);
   const [likedProfiles, setLikedProfiles] = useState<Chan[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const profile: Chan | undefined = availableProfiles[index];
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("animeToken");
@@ -21,21 +20,16 @@ export function useSwipeLogic() {
     };
   };
 
-  const fetchProfiles = async () => {
+  const fetchChans = async () => {
     try {
-      const page = 1;
-      const limit = 10;
-
       const res = await fetch(
-      `${API_BASE_URL}${ROUTES.girls.all}?page=${page}&limit=${limit}`,
-      {
-        headers: getAuthHeaders(),
-      });
+        `${API_BASE_URL}${ROUTES.girls.unliked}?page=1&limit=10`,
+        { headers: getAuthHeaders() }
+      );
 
       if (!res.ok) throw new Error("Ошибка загрузки всех тян");
 
       const data = await res.json();
-      console.log("Тянки прилетели!", data)
       setAvailableProfiles(data.data);
     } catch (err) {
       console.error("Ошибка загрузки профилей:", err);
@@ -44,14 +38,14 @@ export function useSwipeLogic() {
     }
   };
 
-  const fetchLikedProfiles = async () => {
+  const fetchLikedChans = async () => {
     try {
       setLoading(true);
+
       const res = await fetch(`${API_BASE_URL}${ROUTES.girls.liked}`, {
         headers: getAuthHeaders(),
       });
 
-      console.log("OUTPUT LIKED GIRLS", res)
       if (!res.ok) throw new Error("Ошибка загрузки лайкнутых тян");
 
       const data = await res.json();
@@ -65,22 +59,11 @@ export function useSwipeLogic() {
 
   useEffect(() => {
     if (!user) return;
-    fetchProfiles();
+    fetchChans();
   }, [user]);
 
-  const next = () => {
-    setIndex((prev) => {
-      if (availableProfiles.length === 0) return prev;
-
-      const newIndex = prev + 1;
-
-      if (newIndex >= availableProfiles.length) {
-        alert("🎉 Вы просмотрели всех!");
-        return prev;
-      }
-
-      return newIndex;
-    });
+  const removeProfile = (id: number) => {
+    setAvailableProfiles((prev) => prev.filter((p) => p.id !== id));
   };
 
   const sendLikeToServer = async (profile: Chan) => {
@@ -96,53 +79,47 @@ export function useSwipeLogic() {
 
   const sendDislikeToServer = async (profile: Chan) => {
     try {
-      console.log("SENDING DISLIKE TO SERVER")
-
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.dislike(profile.id)}`, {
-        method: "POST",
+      await fetch(`${API_BASE_URL}${ROUTES.girls.unlike(profile.id)}`, {
+        method: "DELETE",
         headers: getAuthHeaders(),
       });
-
-      const data = await response.json();
-
-      console.log("DISLIKE MATAFA", data, profile.id)
     } catch (err) {
       console.error("Ошибка дизлайка:", err);
     }
   };
 
-  const handleLike = async () => {
-    if (!profile) return;
-
+  const handleLike = async (profile: Chan) => {
     setMatches((prev) => [...prev, profile]);
 
     await sendLikeToServer(profile);
 
-    next();
+    removeProfile(profile.id);
   };
 
-  const handleSkip = async () => {
-    if (profile) {
-      await sendDislikeToServer(profile);
-    }
+  const handleSkip = async (profile: Chan) => {
+    await sendDislikeToServer(profile);
 
-    next();
+    removeProfile(profile.id);
   };
 
   const handleRestart = () => {
-    setIndex(0);
     setMatches([]);
+    fetchChans();
+  };
+
+  const refetch = async () => {
+    setLoading(true);
+    await fetchChans();
   };
 
   return {
-    profile,
-    index,
+    availableProfiles,
     matches,
     likedProfiles,
     loading,
-    total: availableProfiles.length,
     handleLike,
     handleSkip,
     handleRestart,
+    refetch
   };
 }
