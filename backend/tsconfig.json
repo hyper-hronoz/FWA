@@ -11,6 +11,6 @@
   },
   "include": ["src"],
    "paths": {
-     "@shared/*": ["./shared/*"]
+     "@shared/*": ["../shared/*"]
    }
 }

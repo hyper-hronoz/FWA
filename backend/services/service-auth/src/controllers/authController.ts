@@ -2,6 +2,8 @@ import { Request, response, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { db } from "../db/db";
+import type {AuthResponse} from "../shared/Auth"
+import { User } from "../shared/Profile";
 
 export const register = async (req: Request, res: Response) => {
  const { username, email, password, age } = req.body;
@@ -30,7 +32,7 @@ export const login = async (req: Request, res: Response) => {
  if (!user) {
    return res.status(404).json({ message: "User not found" });
  }
-console.log(password+" - "+user.password_hash)
+
  const valid = await bcrypt.compare(password, user.password_hash);
 
  if (!valid) {
@@ -42,8 +44,21 @@ console.log(password+" - "+user.password_hash)
    "SECRET_KEY",
    { expiresIn: "1d" }
  );
+  const safeUser: User = {
+          id: user.id,
+          email: user.email,
+          username: user.name,
+          age: user.age,
+          avatar: user.avatar,
+          createdAt: user.createdAt,
+          is_admin:user.is_admin
+        };
+  const response: AuthResponse = {
+    user: safeUser,
+    token: token
+  };
 
- res.json({ token });
+ res.json(response);
 };
 
 export const me = async (req: Request, res: Response) => {
