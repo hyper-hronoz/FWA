@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+
+  service-auth:
+    build: ./services/service-auth
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  service-girls:
+    build: ./services/service-girls
+    ports:
+      - "3002:3002"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  service-users:
+    build: ./services/service-users
+    ports:
+      - "3003:3003"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  service-gateway:
+    build: ./service-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - service-auth
+      - service-users
+      - service-girls
+    networks:
+      - backend
+
+  db:
+    image: mysql:9.2
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+
+networks:
+  backend:
+    driver: bridge

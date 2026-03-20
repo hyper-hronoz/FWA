@@ -9,7 +9,7 @@ const options = {
       description: "API для сайта знакомств с аниме-тянками",
     },
     servers: [
-      { url: "http://localhost:3001" }
+      { url: "http://localhost:3002" }
     ],
     components: {
       securitySchemes: {
@@ -23,5 +23,6 @@ const options = {
   },
   apis: ["./src/routes/*.ts"],
 };
+
 
 export const swaggerSpec = swaggerJsdoc(options);
