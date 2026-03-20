@@ -1,5 +1,5 @@
-// export const API_BASE_URL = 'http://192.168.0.105:3001'
-export const API_BASE_URL = 'http://localhost:3001'
+export const API_BASE_URL = 'http://192.168.0.101:3000'
+// export const API_BASE_URL = 'http://localhost:3001'
 
 export const ROUTES = {
   auth: {
@@ -9,5 +9,15 @@ export const ROUTES = {
   },
   users: {
     profile: '/users/profile',
+    all: '/user/all',           
+    update: (id: string | number) => `/user/update/${id}`,
+    logout: '/user/logout',
+  },
+  girls: {
+    all: '/girls/all',
+    create: '/girls/create',
+    like: (id: number | string) => `/girls/${id}/like`,
+    dislike: (id: number | string) => `/girls/${id}/dislike`,
+    liked: '/girls/liked',
   }
 }

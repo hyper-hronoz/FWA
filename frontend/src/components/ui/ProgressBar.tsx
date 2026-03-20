@@ -12,11 +12,8 @@ export default function ProgressBar({
   showLabels = true
 }: ProgressBarProps) {
 
-  // защита от NaN / undefined / отрицательных значений
   const safeIndex = Number.isFinite(currentIndex) ? Math.max(0, currentIndex) : 0
   const safeTotal = Number.isFinite(totalProfiles) && totalProfiles > 0 ? totalProfiles : 1
-
-  // нормализуем индекс чтобы не выйти за границы
   const normalizedIndex = Math.min(safeIndex, safeTotal)
 
   const progress = Math.max(
@@ -40,7 +37,6 @@ export default function ProgressBar({
           style={{ width: `${progress}%` }}
         />
 
-        {/* glow effect */}
         <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none" />
 
       </div>

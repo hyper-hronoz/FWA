@@ -10,7 +10,6 @@ export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
   const [videoError, setVideoError] = useState(false)
 
   useEffect(() => {
-    // Пробуем воспроизвести видео с задержкой
     const timer = setTimeout(() => {
       if (videoRef.current && !videoError) {
         videoRef.current.play()
@@ -27,7 +26,6 @@ export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
     return () => clearTimeout(timer)
   }, [videoError])
 
-  // Сбрасываем ошибку при изменении источника видео
   useEffect(() => {
     setVideoError(false)
   }, [videoSrc])
@@ -42,7 +40,7 @@ export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
           muted
           loop
           playsInline
-          key={videoSrc} // Важно для перезагрузки видео при изменении источника
+          key={videoSrc} 
           onError={(e) => {
             console.error('Video error:', e)
             setVideoError(true)
@@ -52,7 +50,6 @@ export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
           Your browser does not support the video tag.
         </video>
         
-        {/* Затемняющие слои для краев */}
         <div className="shadow-overlay" />
         <div className="vignette-overlay" />
         <div className="edge-shadows">

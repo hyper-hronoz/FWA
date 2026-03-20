@@ -46,11 +46,11 @@ export function useAuth() {
     const savedUser = localStorage.getItem('animeUser')
 
     // s remove
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      return;
-    }
-    return;
+    // if (savedUser) {
+    //   setUser(JSON.parse(savedUser));
+    //   return;
+    // }
+    // return;
     // e remove
 
     if (!token || !savedUser) {
@@ -88,12 +88,13 @@ export function useAuth() {
   }
 
   const login = async (data: LoginData) => {
-    // Comment out fake login for production
-    return fake_login();
-
     try {
+      console.log("LOGIN TRIGGERED")
+
       setLoading(true)
       setError(null)
+
+      console.log("FETCHING")
 
       const response = await fetch(`${API_BASE_URL}${ROUTES.auth.login}`, {
         method: 'POST',
@@ -101,12 +102,17 @@ export function useAuth() {
         body: JSON.stringify(data)
       })
 
+      console.log("RESPONSE RECEIVED")
+
       if (!response.ok) {
+        console.log("ERROR IN LOGIN")
         const err = await response.json()
         throw new Error(err.message || 'Ошибка входа')
       }
 
       const result: AuthResponse = await response.json()
+
+      console.log("LOGIN REQ RES", result)
       localStorage.setItem('animeToken', result.token)
       localStorage.setItem('animeUser', JSON.stringify(result.user))
       setUser(result.user)
@@ -155,19 +161,16 @@ export function useAuth() {
       setLoading(false)
     }
   }
-
   
   const logout = async () => {
     try {
       console.log("logout triggered hook")
-      // pass
     } finally {
       localStorage.removeItem('animeToken')
       localStorage.removeItem('animeUser')
       setUser(null)
     }
   }
-
 
   const updateProfile = async (data: Partial<User>) => {
     try {

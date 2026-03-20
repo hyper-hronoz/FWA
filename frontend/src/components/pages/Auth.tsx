@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { WelcomeVideo } from '../ui/WelcomeVideo'
 import { useAuth } from '../../hooks/useAuth'
 import { useAuthContext } from '../../context/AuthContext'
+import AnimeLoading from "../ui/AnimeLoading.tsx"
 
 import type { AuthProps } from '../../types/Auth.ts'
 
 export default function Auth({ mode }: AuthProps) {
   const navigate = useNavigate()
-   const { login, register, loading } = useAuthContext()
+  const {user, login, register, loading } = useAuthContext()
   const isLogin = mode === 'login'
 
   const [formData, setFormData] = useState({
@@ -21,6 +22,9 @@ export default function Auth({ mode }: AuthProps) {
 
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false)
+
+  if (loading) return <AnimeLoading/>
+  if (user) return <Navigate to="/swipe" replace />;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -57,6 +61,8 @@ export default function Auth({ mode }: AuthProps) {
         setError(result.error!)
         return
       }
+
+      navigate("/login");
     } else {
       const result = await login({
         email: formData.email,
@@ -72,8 +78,6 @@ export default function Auth({ mode }: AuthProps) {
         return
       }
     }
-
-    navigate('/swipe', {replace:true})
   }
 
   return (

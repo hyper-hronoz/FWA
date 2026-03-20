@@ -33,8 +33,24 @@ export default function ChanCard({
   return (
     <div className="relative w-full max-w-md bg-anime-card bg-opacity-80 backdrop-blur-lg border border-anime-primary border-opacity-30 rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
 
+      <div className="relative w-full h-80 overflow-hidden">
+        {!imageError ? (
+          <img
+            src={chan.avatar}
+            alt={chan.username}
+            onError={() => setImageError(true)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-anime-background text-6xl">
+            🫠
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div className="absolute inset-0 border-2 border-anime-primary border-opacity-40 rounded-t-2xl pointer-events-none"></div>
+      </div>
+
       <div className="p-6">
-        {/* INFO */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-3xl font-bold text-anime-text font-anime">
             {chan.username}
@@ -45,19 +61,24 @@ export default function ChanCard({
           </span>
         </div>
 
-        {/* INTERESTS */}
         <div className="flex flex-wrap gap-2 mb-4">
           {chan.interests?.map((interest: string, i: number) => (
             <span
               key={i}
-              className="bg-gradient-to-r from-anime-primary to-anime-secondary text-white px-3 py-1 rounded-full text-sm"
+              className="
+                bg-gradient-to-r from-anime-primary to-anime-secondary 
+                text-white px-3 py-1 rounded-full text-sm
+                border border-white/30
+                shadow-md shadow-anime-primary/30
+                backdrop-blur-sm
+                transition hover:scale-105 hover:shadow-lg
+              "
             >
               {interest}
             </span>
           ))}
         </div>
 
-        {/* BIO */}
         <p className="text-anime-textSoft mb-4 border-l-4 border-anime-primary pl-4 italic">
           {chan.bio || "Этот отаку пока не написал о себе..."}
         </p>
@@ -73,7 +94,6 @@ export default function ChanCard({
           </div>
         )}
 
-        {/* ACTION BUTTONS */}
         <div className="flex justify-center gap-6 mt-6">
           <button
             onClick={handleSkipClick}
