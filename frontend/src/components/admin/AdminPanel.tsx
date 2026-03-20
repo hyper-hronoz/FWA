@@ -135,7 +135,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
     console.log(formData)
 
     try {
-      const response = await fetch("/api/chans", {  // ← поменяйте на ваш реальный endpoint
+      const response = await fetch("/api/chans", { 
         method: "POST",
         body: formData,
       });
