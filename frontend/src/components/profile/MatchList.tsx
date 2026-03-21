@@ -10,7 +10,6 @@ export default function MatchList({ matches }: MatchListProps) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Кнопка для открытия списка */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative bg-gradient-to-r from-anime-primary to-anime-secondary p-4 rounded-full shadow-2xl transform transition-all duration-300 hover:scale-110 animate-float"
@@ -21,7 +20,6 @@ export default function MatchList({ matches }: MatchListProps) {
         </span>
       </button>
 
-      {/* Выпадающий список */}
       {isOpen && (
         <div className="absolute bottom-20 right-0 w-80 bg-anime-card rounded-2xl overflow-hidden shadow-2xl border border-anime-primary border-opacity-30 animate-slide-up">
           <div className="bg-gradient-to-r from-anime-primary to-anime-secondary p-4">
@@ -67,7 +65,6 @@ export default function MatchList({ matches }: MatchListProps) {
             ))}
           </div>
 
-          {/* Забавная статистика */}
           <div className="p-4 bg-anime-background border-t border-anime-primary border-opacity-30">
             <p className="text-anime-textSoft text-center text-sm font-cute">
               {matches.length === 1 ? '💖 Начало прекрасной истории!' :

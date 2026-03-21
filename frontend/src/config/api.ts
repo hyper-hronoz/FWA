@@ -6,6 +6,8 @@ export const ROUTES = {
     login: '/auth/login',
     register: '/auth/register',
     me: '/auth/me',
+    refresh: '/auth/refresh',
+    logout: '/auth/logout',
   },
   users: {
     profile: '/users/profile',

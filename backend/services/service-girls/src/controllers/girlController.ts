@@ -2,6 +2,15 @@ import { Request, Response } from "express";
 import { db } from "../db/db";
 import { RowDataPacket } from "mysql2";
 
+const shuffleArray = <T>(items: T[]): T[] => {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 
 export const getAllGirls = async (req: Request, res: Response) => {
   try {
@@ -24,7 +33,7 @@ export const getAllGirls = async (req: Request, res: Response) => {
     const total = countResult[0].total;
 
     res.json({
-      data: rows,
+      data: shuffleArray(rows),
       pagination: {
         page,
         limit,
@@ -75,8 +84,14 @@ export const getUnlikedGirls = async (req: Request, res: Response) => {
 
     const total = countResult[0].total;
 
+    const shuffledRows = [...rows];
+    for (let i = shuffledRows.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledRows[i], shuffledRows[j]] = [shuffledRows[j], shuffledRows[i]];
+    }
+
     res.json({
-      data: rows,
+      data: shuffledRows,
       pagination: {
         page,
         limit,

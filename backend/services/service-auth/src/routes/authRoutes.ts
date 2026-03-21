@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, register ,logOut, me } from "../controllers/authController";
+import { login, register, me, refresh, logout } from "../controllers/authController";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();
@@ -67,6 +67,7 @@ router.post("/register", register);
  *                   type: string
  */
 router.post("/login", login);
+router.post("/refresh", refresh);
 
 /**
  * @swagger
@@ -118,6 +119,6 @@ router.post("/login", login);
  *                   type: string
  *                   example: "Logged out. Delete token on client."
  */
-router.post("/logout", authMiddleware, logOut);
+router.post("/logout", authMiddleware, logout);
 
 export default router;

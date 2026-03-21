@@ -11,7 +11,7 @@ export function useLiked() {
   const [loading, setLoading] = useState(true);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem("animeToken");
+    const token = localStorage.getItem("animeAccessToken");
     return {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",

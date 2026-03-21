@@ -30,14 +30,12 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  // Синхронизация интересов при открытии формы
   useEffect(() => {
     if (editingId !== null || isAdding) {
       setInterestsInput(editForm.interests?.join(", ") || "");
     }
   }, [editingId, isAdding, editForm.interests]);
 
-  // Передача изменений наверх (если всё ещё нужно для родительского компонента)
   useEffect(() => {
     onProfilesChange(profiles);
   }, [profiles, onProfilesChange]);
@@ -89,7 +87,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
     setEditForm(profile);
     setPreviewAvatar(profile.avatar);
     setPreviewVideo(profile.video);
-    // При редактировании файлы не меняем, если не загружаем новые
     setAvatarFile(null);
     setVideoFile(null);
   };
@@ -117,14 +114,12 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
 
     const formData = new FormData();
 
-    // Текстовые поля
     formData.append("username", editForm.username!.trim());
     formData.append("age", String(editForm.age!));
     formData.append("bio", editForm.bio!.trim());
     formData.append("favoriteAnime", (editForm.favoriteAnime || "Не указано").trim());
     formData.append("interests", JSON.stringify(parsedInterests));
 
-    // Файлы
     if (avatarFile) {
       formData.append("avatar", avatarFile);
     }
@@ -145,7 +140,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
         throw new Error(errorText || `Ошибка сервера: ${response.status}`);
       }
 
-      const newChan = await response.json();  // ожидаем, что сервер вернёт созданный объект с id
+      const newChan = await response.json();
 
       setProfiles(prev => [...prev, newChan]);
       cleanupForm();
@@ -158,7 +153,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
   };
 
   const handleSave = () => {
-    // Пока оставляем локальное сохранение (можно реализовать аналогично handleAdd)
     if (!isFormValid() || editingId === null) return;
 
     const parsedInterests = interestsInput
@@ -220,7 +214,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Заголовок и кнопка назад */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
@@ -236,7 +229,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
           </button>
         </div>
 
-        {/* Форма добавления / редактирования */}
         {(isAdding || editingId !== null) && (
           <div className="bg-white/8 backdrop-blur-md rounded-2xl p-6 border border-pink-500/30 mb-10 shadow-xl">
             <h3 className="text-2xl font-bold text-white mb-6">
@@ -288,7 +280,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                 />
               </div>
 
-              {/* Видео */}
               <div>
                 <label className="block text-gray-300 mb-2 font-medium">Видео-приветствие</label>
                 {previewVideo ? (
@@ -333,7 +324,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
               </div>
             </div>
 
-            {/* Остальные поля формы остаются без изменений */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-gray-300 mb-1.5 font-medium">Имя</label>
@@ -426,7 +416,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
           </div>
         )}
 
-        {/* Поиск + фильтры + кнопка добавить */}
         <div className="bg-white/8 backdrop-blur-md rounded-2xl p-5 border border-white/10 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -462,7 +451,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
           </div>
         </div>
 
-        {/* Список профилей */}
         <div className="space-y-5">
           {filteredProfiles.length === 0 && !isAdding && (
             <div className="text-center py-20">

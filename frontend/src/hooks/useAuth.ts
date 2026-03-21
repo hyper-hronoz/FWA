@@ -9,27 +9,26 @@ export function useAuth() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const ACCESS_TOKEN_KEY = 'animeAccessToken'
+  const REFRESH_TOKEN_KEY = 'animeRefreshToken'
+  const USER_KEY = 'animeUser'
+
   useEffect(() => {
     checkAuth()
   }, [])
 
-  const fake_login = () => {
-    const userToSave = {
-      id: "1",
-      username: "Анна Коваленко",
-      age: 18,
-      email: "anna.kovalenko@example.com",
-      createdAt: "2024-01-15T10:30:00.000Z",
-      is_admin: true
-    }
+  const saveAuth = (payload: AuthResponse) => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, payload.accessToken)
+    localStorage.setItem(REFRESH_TOKEN_KEY, payload.refreshToken)
+    localStorage.setItem(USER_KEY, JSON.stringify(payload.user))
+    setUser(payload.user)
+  }
 
-    localStorage.setItem('animeToken', JSON.stringify('token-sdfksdkfj-token'))
-    localStorage.setItem('animeUser', JSON.stringify(userToSave))
-
-    setUser(userToSave)
-    setLoading(false)
-
-    return { success: true, user: userToSave }
+  const clearAuth = () => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    setUser(null)
   }
 
   const getErrorMessage = (error: unknown): string => {
@@ -38,49 +37,76 @@ export function useAuth() {
     return 'An unknown error occurred'
   }
 
+  const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+    if (!refreshToken) return null
+
+    const response = await fetch(`${API_BASE_URL}${ROUTES.auth.refresh}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    })
+
+    if (!response.ok) {
+      clearAuth()
+      return null
+    }
+
+    const refreshed = await response.json() as { accessToken: string; refreshToken: string }
+    localStorage.setItem(ACCESS_TOKEN_KEY, refreshed.accessToken)
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshed.refreshToken)
+    return refreshed.accessToken
+  }
+
+  const authFetch = async (url: string, options: RequestInit = {}) => {
+    let accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+    const headers = new Headers(options.headers || {})
+
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    }
+
+    const response = await fetch(url, { ...options, headers })
+    if (response.status !== 401 && response.status !== 403) {
+      return response
+    }
+
+    accessToken = await refreshAccessToken()
+    if (!accessToken) {
+      return response
+    }
+
+    headers.set('Authorization', `Bearer ${accessToken}`)
+    return fetch(url, { ...options, headers })
+  }
+
   const checkAuth = async () => {
-    // Comment out fake login for production
-    // return fake_login();
+    const savedUser = localStorage.getItem(USER_KEY)
+    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
 
-    const token = localStorage.getItem('animeToken')
-    const savedUser = localStorage.getItem('animeUser')
-
-    // s remove
-    // if (savedUser) {
-    //   setUser(JSON.parse(savedUser));
-    //   return;
-    // }
-    // return;
-    // e remove
-
-    if (!token || !savedUser) {
+    if (!savedUser || (!accessToken && !refreshToken)) {
       setUser(null)
       return
     }
 
     try {
       setLoading(true)
-      const response = await fetch(`${API_BASE_URL}${ROUTES.auth.me}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.auth.me}`)
 
       if (response.ok) {
         const userData = await response.json()
-        console.log(response)
-        console.log(userData)
         setUser(userData)
+        localStorage.setItem(USER_KEY, JSON.stringify(userData))
       } else {
-        localStorage.removeItem('animeToken')
-        localStorage.removeItem('animeUser')
-        setUser(null)
+        clearAuth()
       }
     } catch {
       try {
-        const parsedUser = JSON.parse(savedUser as string) as User
+        const parsedUser = JSON.parse(savedUser) as User
         setUser(parsedUser)
-      } catch (parseError) {
-        console.error('Failed to parse saved user:', parseError)
-        setUser(null)
+      } catch {
+        clearAuth()
       }
     } finally {
       setLoading(false)
@@ -89,12 +115,8 @@ export function useAuth() {
 
   const login = async (data: LoginData) => {
     try {
-      console.log("LOGIN TRIGGERED")
-
       setLoading(true)
       setError(null)
-
-      console.log("FETCHING")
 
       const response = await fetch(`${API_BASE_URL}${ROUTES.auth.login}`, {
         method: 'POST',
@@ -102,20 +124,13 @@ export function useAuth() {
         body: JSON.stringify(data)
       })
 
-      console.log("RESPONSE RECEIVED")
-
       if (!response.ok) {
-        console.log("ERROR IN LOGIN")
         const err = await response.json()
         throw new Error(err.message || 'Ошибка входа')
       }
 
       const result: AuthResponse = await response.json()
-
-      console.log("LOGIN REQ RES", result)
-      localStorage.setItem('animeToken', result.token)
-      localStorage.setItem('animeUser', JSON.stringify(result.user))
-      setUser(result.user)
+      saveAuth(result)
 
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission()
@@ -148,9 +163,7 @@ export function useAuth() {
       }
 
       const result: AuthResponse = await response.json()
-      localStorage.setItem('animeToken', result.token)
-      localStorage.setItem('animeUser', JSON.stringify(result.user))
-      setUser(result.user)
+      saveAuth(result)
 
       return { success: true, user: result.user }
     } catch (err) {
@@ -164,11 +177,20 @@ export function useAuth() {
   
   const logout = async () => {
     try {
-      console.log("logout triggered hook")
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+      const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+      if (refreshToken && accessToken) {
+        await fetch(`${API_BASE_URL}${ROUTES.auth.logout}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({ refreshToken })
+        })
+      }
     } finally {
-      localStorage.removeItem('animeToken')
-      localStorage.removeItem('animeUser')
-      setUser(null)
+      clearAuth()
     }
   }
 
@@ -177,14 +199,10 @@ export function useAuth() {
       setLoading(true)
       setError(null)
 
-      const token = localStorage.getItem('animeToken')
-      if (!token) throw new Error('Не авторизован')
-
-      const response = await fetch(`${API_BASE_URL}${ROUTES.users.profile}`, {
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.users.profile}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
       })
@@ -195,7 +213,7 @@ export function useAuth() {
       }
 
       const updatedUser = await response.json()
-      localStorage.setItem('animeUser', JSON.stringify(updatedUser))
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser))
       setUser(updatedUser)
 
       return { success: true, user: updatedUser }
