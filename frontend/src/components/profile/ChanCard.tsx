@@ -33,7 +33,7 @@ export default function ChanCard({
   }
 
   return (
-    <div className="relative w-full max-w-md bg-anime-card bg-opacity-80 backdrop-blur-lg border border-anime-primary border-opacity-30 rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+    <div className="relative w-full h-full min-h-[600px] max-w-[450px]  max-h-[600px]  bg-anime-card bg-opacity-80 backdrop-blur-lg border border-anime-primary border-opacity-30 rounded-2xl shadow-2xl overflow-hidden animate-slide-up flex flex-col">
 
       <div className="relative w-full h-80 overflow-hidden">
         {!imageError ? (
@@ -52,7 +52,7 @@ export default function ChanCard({
         <div className="absolute inset-0 border-2 border-anime-primary border-opacity-40 rounded-t-2xl pointer-events-none"></div>
       </div>
 
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-1">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-3xl font-bold text-anime-text font-anime">
             {chan.username}
@@ -63,7 +63,7 @@ export default function ChanCard({
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap content-start gap-2 mb-4 min-h-[64px]">
           {chan.interests?.map((interest: string, i: number) => (
             <span
               key={i}
@@ -81,7 +81,7 @@ export default function ChanCard({
           ))}
         </div>
 
-        <p className="text-anime-textSoft mb-4 border-l-4 border-anime-primary pl-4 italic">
+        <p className="text-anime-textSoft mb-4 border-l-4 border-anime-primary pl-4 italic line-clamp-3 min-h-[78px]">
           {chan.bio || "Этот отаку пока не написал о себе..."}
         </p>
 
@@ -96,7 +96,7 @@ export default function ChanCard({
           </div>
         )}
 
-        <div className="flex justify-center gap-6 mt-6">
+        <div className="flex justify-center gap-6 mt-auto pt-4">
           {onSkip && (
             <button
               onClick={handleSkipClick}

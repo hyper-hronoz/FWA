@@ -48,17 +48,18 @@ export default function Liked({ onLike, onSkip }: LikedProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-anime-background to-purple-900 p-8">
-      <h2 className="text-2xl md:text-3xl font-bold text-anime-text mb-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-anime-text mb-6 text-center">
         Лайкнутые тян
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="mx-auto w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
         {localProfiles.map((chan: Chan) => (
-          <ChanCard
-            key={chan.id}
-            chan={chan}
-            onSkip={() => handleSkip(chan)}
-          />
+          <div key={chan.id} className="w-full max-w-[360px] h-full">
+            <ChanCard
+              chan={chan}
+              onSkip={() => handleSkip(chan)}
+            />
+          </div>
         ))}
       </div>
     </div>
