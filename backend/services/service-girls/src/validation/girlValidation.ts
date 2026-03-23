@@ -4,9 +4,9 @@ import { body } from "express-validator/lib/middlewares/validation-chain-builder
 // CREATE GIRL VALIDATION
 // ======================
 export const createGirlValidation = [
-  body("name")
+  body("username")
     .notEmpty()
-    .withMessage("Name is required")
+    .withMessage("Username is required")
     .isLength({ min: 2, max: 50 })
     .withMessage("Имя неверное"),
 
@@ -16,14 +16,14 @@ export const createGirlValidation = [
     .isInt({ min: 18, max: 100 })
     .withMessage("Только старше 18"),
 
-  body("description")
+  body("bio")
     .notEmpty()
-    .withMessage("Description is required")
+    .withMessage("Bio is required")
     .isLength({ min: 10, max: 500 })
     .withMessage("Описание от 10 до 500 символов"),
 
-  body("video_url")
+  body("favoriteAnime")
     .optional()
-    .isURL()
-    .withMessage("Некорректная ссылка"),
+    .isLength({ max: 100 })
+    .withMessage("Любимое аниме слишком длинное"),
 ];

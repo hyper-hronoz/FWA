@@ -9,6 +9,7 @@ export interface AuthContextType {
   user: User | null;
   login: (data: LoginData) => Promise<{ success: boolean; user?: User; error?: string }>;
   register: (data: RegisterData) => Promise<{ success: boolean; user?: User; error?: string }>;
+  updateProfile: (data: Partial<User> & { password?: string }) => Promise<{ success: boolean; user?: User; error?: string }>;
   loading: boolean;
   logout: () => void;
 }
@@ -16,10 +17,10 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { user, login, register, logout, loading } = useAuthHook();
+  const { user, login, register, logout, loading, updateProfile } = useAuthHook();
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, updateProfile, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

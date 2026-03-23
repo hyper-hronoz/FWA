@@ -37,6 +37,18 @@ export function useAuth() {
     return 'An unknown error occurred'
   }
 
+  const parseErrorResponse = async (response: Response) => {
+    const contentType = response.headers.get('content-type') || ''
+
+    if (contentType.includes('application/json')) {
+      const err = await response.json() as { message?: string }
+      return err.message || 'Ошибка запроса'
+    }
+
+    const text = await response.text()
+    return text || `Ошибка запроса: ${response.status}`
+  }
+
   const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
     if (!refreshToken) return null
@@ -208,8 +220,7 @@ export function useAuth() {
       })
 
       if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.message || 'Ошибка обновления профиля')
+        throw new Error(await parseErrorResponse(response))
       }
 
       const updatedUser = await response.json()

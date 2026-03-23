@@ -10,6 +10,7 @@ import SwipeScreen from "./components/pages/SwipeScreen";
 import MatchList from "./components/profile/MatchList";
 import AdminPanel from "./components/admin/AdminPanel";
 import Liked from "./components/pages/Liked";
+import ProfileSettings from "./components/pages/ProfileSettings";
 
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { ProtectedRoute, GuestRoute, AdminRoute } from "./routing/ProtectedRoute";
@@ -90,6 +91,18 @@ function App() {
                     onRestart={handleRestart}
                   />
                 }
+              />
+
+              <Route
+                path="/settings"
+                element={<ProfileSettings />}
+              />
+            </Route>
+
+            <Route element={<AdminRoute />}>
+              <Route
+                path="/admin"
+                element={<AdminPanel />}
               />
             </Route>
 

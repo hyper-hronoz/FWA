@@ -29,20 +29,24 @@ const createProxy = (baseUrl: string) => {
   return async (req: any, res: any) => {
     try {
       const url = `${baseUrl}${req.originalUrl}`;
+      const contentType = req.headers["content-type"] || "";
+      const isMultipart = typeof contentType === "string" && contentType.includes("multipart/form-data");
 
       const response = await axios({
         method: req.method,
         url,
-        data: req.body,
+        data: isMultipart ? req : req.body,
         params: req.query,
         headers: {
-          "Content-Type": req.headers["content-type"] || "",
-          Authorization: req.headers["authorization"] || "",
+          ...req.headers,
+          host: undefined,
         },
         validateStatus: () => true, // важно: не падать на 4xx/5xx
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       });
 
-      res.status(response.status).json(response.data);
+      res.status(response.status).send(response.data);
     } catch (error: any) {
       console.error("Gateway error:", error.message);
 
@@ -55,6 +59,7 @@ const createProxy = (baseUrl: string) => {
 
 
 app.use("/auth", createProxy(SERVICES.auth));
+app.use("/user", createProxy(SERVICES.users));
 app.use("/users", createProxy(SERVICES.users));
 app.use("/girls", createProxy(SERVICES.girls));
 

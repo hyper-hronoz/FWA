@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../db/db";
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 const shuffleArray = <T>(items: T[]): T[] => {
   const shuffled = [...items];
@@ -11,6 +11,57 @@ const shuffleArray = <T>(items: T[]): T[] => {
   return shuffled;
 };
 
+const parseInterests = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(normalized);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item) => String(item).trim()).filter(Boolean);
+    }
+  } catch {
+    return normalized
+      .split(/[\s,#]+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const normalizeGirl = (row: RowDataPacket) => ({
+  id: row.id,
+  username: row.username,
+  age: row.age,
+  bio: row.bio ?? "",
+  video: row.video ?? "",
+  avatar: row.avatar ?? "",
+  favoriteAnime: row.favoriteAnime ?? row.favorite_anime ?? "",
+  interests: parseInterests(row.interests),
+});
+
+const fetchGirlById = async (id: number) => {
+  const [rows] = await db.query<RowDataPacket[]>(
+    `SELECT id, username, age, bio, video, avatar, interests, favorite_anime AS favoriteAnime
+     FROM girls
+     WHERE id = ?`,
+    [id]
+  );
+
+  return rows[0] ? normalizeGirl(rows[0]) : null;
+};
+
 
 export const getAllGirls = async (req: Request, res: Response) => {
   try {
@@ -19,7 +70,7 @@ export const getAllGirls = async (req: Request, res: Response) => {
     const offset = (page - 1) * limit;
 
     const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT id, username, age, bio, video, avatar, interests
+      `SELECT id, username, age, bio, video, avatar, interests, favorite_anime AS favoriteAnime
        FROM girls
        ORDER BY id DESC
        LIMIT ? OFFSET ?`,
@@ -33,7 +84,7 @@ export const getAllGirls = async (req: Request, res: Response) => {
     const total = countResult[0].total;
 
     res.json({
-      data: shuffleArray(rows),
+      data: shuffleArray(rows.map(normalizeGirl)),
       pagination: {
         page,
         limit,
@@ -57,7 +108,7 @@ export const getUnlikedGirls = async (req: Request, res: Response) => {
     const offset = (page - 1) * limit;
 
     const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT g.id, g.username, g.age, g.bio, g.video, g.avatar, g.interests
+      `SELECT g.id, g.username, g.age, g.bio, g.video, g.avatar, g.interests, g.favorite_anime AS favoriteAnime
        FROM girls g
        WHERE NOT EXISTS (
          SELECT 1
@@ -84,7 +135,7 @@ export const getUnlikedGirls = async (req: Request, res: Response) => {
 
     const total = countResult[0].total;
 
-    const shuffledRows = [...rows];
+    const shuffledRows = rows.map(normalizeGirl);
     for (let i = shuffledRows.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffledRows[i], shuffledRows[j]] = [shuffledRows[j], shuffledRows[i]];
@@ -107,15 +158,28 @@ export const getUnlikedGirls = async (req: Request, res: Response) => {
 
 
 export const createGirl = async (req: Request, res: Response) => {
-  const { username, age, description, video_url, interests } = req.body;
+  const { username, age, bio, favoriteAnime } = req.body;
+  const avatar = req.files && !Array.isArray(req.files) ? req.files.avatar?.[0] : undefined;
+  const video = req.files && !Array.isArray(req.files) ? req.files.video?.[0] : undefined;
+  const parsedInterests = parseInterests(req.body.interests);
 
   try {
-    await db.query(
-      "INSERT INTO girls (username, age, bio, video, avatar, interests) VALUES (?, ?, ?, ?)",
-      [username, age, description, video_url, interests]
+    const [result] = await db.query<ResultSetHeader>(
+      `INSERT INTO girls (username, age, bio, video, avatar, interests, favorite_anime)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        username,
+        age,
+        bio,
+        video ? `/videos/${video.filename}` : null,
+        avatar ? `/avatars/${avatar.filename}` : null,
+        JSON.stringify(parsedInterests),
+        favoriteAnime ?? "",
+      ]
     );
 
-    res.json({ message: "Girl created" });
+    const createdGirl = await fetchGirlById(result.insertId);
+    res.status(201).json(createdGirl);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Database error" });
@@ -124,8 +188,11 @@ export const createGirl = async (req: Request, res: Response) => {
 
 
 export const updateGirl = async (req: Request, res: Response) => {
-  const girlId = req.params.id;
-  const { username, age, description, video_url } = req.body;
+  const girlId = Number(req.params.id);
+  const { username, age, bio, favoriteAnime } = req.body;
+  const avatar = req.files && !Array.isArray(req.files) ? req.files.avatar?.[0] : undefined;
+  const video = req.files && !Array.isArray(req.files) ? req.files.video?.[0] : undefined;
+  const parsedInterests = req.body.interests === undefined ? undefined : parseInterests(req.body.interests);
 
   try {
     await db.query(
@@ -133,12 +200,50 @@ export const updateGirl = async (req: Request, res: Response) => {
         username = COALESCE(?, username),
         age = COALESCE(?, age),
         bio = COALESCE(?, bio),
-        video = COALESCE(?, video)
+        video = COALESCE(?, video),
+        avatar = COALESCE(?, avatar),
+        interests = COALESCE(?, interests),
+        favorite_anime = COALESCE(?, favorite_anime)
        WHERE id = ?`,
-      [username, age, description, video_url, girlId]
+      [
+        username ?? null,
+        age ?? null,
+        bio ?? null,
+        video ? `/videos/${video.filename}` : null,
+        avatar ? `/avatars/${avatar.filename}` : null,
+        parsedInterests ? JSON.stringify(parsedInterests) : null,
+        favoriteAnime ?? null,
+        girlId,
+      ]
     );
 
-    res.json({ message: "Girl updated" });
+    const updatedGirl = await fetchGirlById(girlId);
+
+    if (!updatedGirl) {
+      return res.status(404).json({ message: "Girl not found" });
+    }
+
+    res.json(updatedGirl);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error" });
+  }
+};
+
+export const deleteGirl = async (req: Request, res: Response) => {
+  const girlId = Number(req.params.id);
+
+  try {
+    const [result] = await db.query<ResultSetHeader>(
+      "DELETE FROM girls WHERE id = ?",
+      [girlId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Girl not found" });
+    }
+
+    res.json({ message: "Girl deleted" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Database error" });
@@ -192,14 +297,14 @@ export const getLikedGirls = async (req: Request, res: Response) => {
 
   try {
     const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT g.id, g.username, g.age, g.bio, g.video, g.avatar, g.interests
+      `SELECT g.id, g.username, g.age, g.bio, g.video, g.avatar, g.interests, g.favorite_anime AS favoriteAnime
        FROM girls g
        JOIN user_girl_likes l ON l.girl_id = g.id
        WHERE l.user_id = ?
          AND l.liked = 1`,
       [userId]
     );
-    res.json(rows);
+    res.json(rows.map(normalizeGirl));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Database error" });

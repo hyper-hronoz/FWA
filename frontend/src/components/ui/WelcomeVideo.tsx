@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import './WelcomeVideo.css'
+import { resolveMediaUrl } from '../../utils/media'
 
 interface WelcomeVideoProps {
   videoSrc: string
@@ -8,6 +9,7 @@ interface WelcomeVideoProps {
 export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoError, setVideoError] = useState(false)
+  const resolvedVideoSrc = resolveMediaUrl(videoSrc)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -40,13 +42,13 @@ export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
           muted
           loop
           playsInline
-          key={videoSrc} 
+          key={resolvedVideoSrc}
+          src={resolvedVideoSrc}
           onError={(e) => {
             console.error('Video error:', e)
             setVideoError(true)
           }}
         >
-          <source src={videoSrc} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         
@@ -56,6 +58,10 @@ export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
           <div className="shadow-left" />
           <div className="shadow-right" />
         </div>
+        <div className="dream-fog-left" />
+        <div className="dream-fog-overlay" />
+        <div className="dream-fog-left-glow" />
+        <div className="dream-fog-glow" />
         
         {videoError && (
           <div className="video-fallback">

@@ -4,7 +4,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["../shared/*"]
     }
   }
 }

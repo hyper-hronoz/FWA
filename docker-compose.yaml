@@ -29,6 +29,8 @@ services:
     build: ./backend/services/service-girls
     ports:
       - "3002:3002"
+    volumes:
+      - ./backend/static:/app/static
     depends_on:
       - db
     env_file:

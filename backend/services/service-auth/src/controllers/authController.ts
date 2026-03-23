@@ -4,17 +4,33 @@ import jwt from "jsonwebtoken";
 import { db } from "../db/db";
 import type {AuthResponse} from "../shared/Auth"
 import { User } from "../shared/Profile";
+import adminsConfig from "../config/admins.json";
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "SECRET_KEY";
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "REFRESH_SECRET_KEY";
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL = "7d";
+const ADMIN_EMAILS = new Set(
+  (adminsConfig.emails || []).map((email) => email.toLowerCase())
+);
 
 const signAccessToken = (user: { id: number; email: string }) =>
   jwt.sign(user, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_TTL });
 
 const signRefreshToken = (user: { id: number; email: string }) =>
   jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_TTL });
+
+const shouldBeAdmin = (email: string) => ADMIN_EMAILS.has(email.toLowerCase());
+
+const syncAdminStatus = async (user: { id: number; email: string; is_admin?: boolean | number }) => {
+  const admin = shouldBeAdmin(user.email);
+
+  if (Boolean(user.is_admin) !== admin) {
+    await db.query("UPDATE users SET is_admin = ? WHERE id = ?", [admin, user.id]);
+  }
+
+  return admin;
+};
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -29,10 +45,11 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
+    const isAdmin = shouldBeAdmin(email);
 
     const [result]: any = await db.query(
-      "INSERT INTO users (username,email,password_hash,age) VALUES (?,?,?,?)",
-      [username, email, hash, age]
+      "INSERT INTO users (username,email,password_hash,age,is_admin) VALUES (?,?,?,?,?)",
+      [username, email, hash, age, isAdmin]
     );
 
     const createdUser = {
@@ -54,7 +71,7 @@ export const register = async (req: Request, res: Response) => {
       age,
       avatar: undefined,
       createdAt: new Date().toISOString(),
-      is_admin: false,
+      is_admin: isAdmin,
     };
 
     const response: AuthResponse = {
@@ -94,6 +111,7 @@ export const login = async (req: Request, res: Response) => {
   const tokenPayload = { id: user.id, email: user.email };
   const accessToken = signAccessToken(tokenPayload);
   const refreshToken = signRefreshToken(tokenPayload);
+  const isAdmin = await syncAdminStatus(user);
 
   await db.query(
     "INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))",
@@ -107,7 +125,7 @@ export const login = async (req: Request, res: Response) => {
     age: user.age,
     avatar: user.avatar ?? null,
     createdAt: user.createdAt ?? new Date().toISOString(),
-    is_admin: Boolean(user.is_admin),
+    is_admin: isAdmin,
   };
   const response: AuthResponse = {
     user: safeUser,
@@ -131,7 +149,13 @@ export const me = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(rows[0]);
+    const user = rows[0];
+    const isAdmin = await syncAdminStatus(user);
+
+    res.json({
+      ...user,
+      is_admin: isAdmin,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

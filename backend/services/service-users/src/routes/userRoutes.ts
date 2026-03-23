@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { 
+  getProfile,
+  updateProfile,
   getAllUsers, 
   updateUser, 
   logOut 
@@ -10,6 +12,9 @@ const router = Router();
 
 // Все маршруты защищены JWT
 router.use(authMiddleware);
+
+router.get("/profile", getProfile);
+router.patch("/profile", updateProfile);
 
 /**
  * @swagger

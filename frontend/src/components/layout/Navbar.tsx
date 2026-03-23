@@ -55,10 +55,20 @@ export default function Navbar({
                 <div className="absolute right-0 mt-2 w-48 bg-anime-card rounded-xl overflow-hidden shadow-2xl border border-anime-primary border-opacity-30 animate-slide-up z-50">
                   <button
                     onClick={() => {
+                      navigate("/settings")
+                      setShowMenu(false)
+                    }}
+                    className="w-full !rounded-none px-4 py-3 text-left text-white bg-anime-secondary hover:bg-[#8748a1] bg-[#8748e1] transition-colors duration-300 flex items-center gap-2 font-cute"
+                  >
+                    Settings
+                  </button>
+
+                  <button
+                    onClick={() => {
                       onLogout()
                       setShowMenu(false)
                     }}
-                    className="w-full px-4 py-3 text-left text-anime-text hover:bg-anime-background transition-colors duration-300 flex items-center gap-2 font-cute group border-t border-anime-primary border-opacity-20"
+                    className="w-full !rounded-none px-4 py-3 text-left text-white bg-anime-secondary hover:bg-[#8748a1] bg-[#8748e1] transition-colors duration-300 flex items-center gap-2 font-cute group border-t border-anime-primary border-opacity-20"
                   >
                     Logout
                   </button>
@@ -69,7 +79,7 @@ export default function Navbar({
                         navigate("/admin")
                         setShowMenu(false)
                       }}
-                      className="w-full px-4 py-3 text-left text-anime-text hover:bg-anime-background transition-colors duration-300 flex items-center gap-2 font-cute group border-t border-anime-primary border-opacity-20"
+                      className="w-full !rounded-none px-4 py-3 text-left text-white bg-anime-secondary hover:bg-[#8748a1] bg-[#8748e1] transition-colors duration-300 flex items-center gap-2 font-cute group border-t border-anime-primary border-opacity-20"
                     >
                       Admin Panel
                     </button>

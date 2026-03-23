@@ -1,19 +1,57 @@
 import { Router } from "express";
+import fs from "fs";
+import multer from "multer";
+import path from "path";
 import {
   getUnlikedGirls,
   getAllGirls,
   createGirl,
   updateGirl,
+  deleteGirl,
   dislikeGirl,
   getLikedGirls,
   unlikeGirl,
   likeGirl,
 } from "../controllers/girlController";
 
-import { authMiddleware, validate } from "../middleware/authMiddleware";
+import { authMiddleware, requireAdmin, validate } from "../middleware/authMiddleware";
 import { createGirlValidation } from "../validation/girlValidation";
 
 const router = Router();
+const staticRoot = process.env.STATIC_ROOT || "/app/static";
+const avatarsDir = path.join(staticRoot, "avatars");
+const videosDir = path.join(staticRoot, "videos");
+
+fs.mkdirSync(avatarsDir, { recursive: true });
+fs.mkdirSync(videosDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === "avatar") {
+      cb(null, avatarsDir);
+      return;
+    }
+
+    cb(null, videosDir);
+  },
+  filename: (req, file, cb) => {
+    const extension = path.extname(file.originalname);
+    const safeBaseName = path
+      .basename(file.originalname, extension)
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    cb(null, `${Date.now()}-${safeBaseName || file.fieldname}${extension}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+  },
+});
 
 /**
  * @swagger
@@ -158,7 +196,17 @@ router.get("/unliked", getUnlikedGirls);
  *       500:
  *         description: Ошибка базы данных
  */
-router.post("/create", createGirlValidation, validate, createGirl);
+router.post(
+  "/create",
+  requireAdmin,
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]),
+  createGirlValidation,
+  validate,
+  createGirl
+);
 
 /**
  * @swagger
@@ -195,7 +243,17 @@ router.post("/create", createGirlValidation, validate, createGirl);
  *       500:
  *         description: Ошибка базы данных
  */
-router.put("/update/:id", updateGirl);
+router.put(
+  "/update/:id",
+  requireAdmin,
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]),
+  updateGirl
+);
+
+router.delete("/:id", requireAdmin, deleteGirl);
 
 /**
  * @swagger

@@ -1,23 +1,21 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Pencil, Trash2, Plus, Save, X, Heart, Star,
-  Filter, Search, Video, Loader2, Play, Camera
+  Pencil, Trash2, Plus, Save, X,
+  Search, Video, Loader2, Camera
 } from "lucide-react";
+import { API_BASE_URL, ROUTES } from "../../config/api";
+import { resolveMediaUrl } from "../../utils/media";
 import type { Chan } from "@shared/Profile";
 
-interface AdminPanelProps {
-  initialProfiles: Chan[];
-  onProfilesChange: (profiles: Chan[]) => void;
-}
-
-export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminPanelProps) {
+export default function AdminPanel() {
   const navigate = useNavigate();
-  const [profiles, setProfiles] = useState<Chan[]>(initialProfiles);
+  const [profiles, setProfiles] = useState<Chan[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAge, setFilterAge] = useState<string>("all");
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
 
   const [editForm, setEditForm] = useState<Partial<Chan>>({});
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
@@ -37,8 +35,37 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
   }, [editingId, isAdding, editForm.interests]);
 
   useEffect(() => {
-    onProfilesChange(profiles);
-  }, [profiles, onProfilesChange]);
+    fetchProfiles();
+  }, []);
+
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("animeAccessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const fetchProfiles = async () => {
+    try {
+      setLoadingProfiles(true);
+
+      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.all}?page=1&limit=100`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setProfiles(Array.isArray(result.data) ? result.data : []);
+    } catch (error) {
+      console.error("Ошибка загрузки тянок:", error);
+      alert("Не удалось загрузить список тянок");
+    } finally {
+      setLoadingProfiles(false);
+    }
+  };
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,8 +157,11 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
     console.log(formData)
 
     try {
-      const response = await fetch("/api/chans", { 
+      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.create}`, {
         method: "POST",
+        headers: {
+          ...getAuthHeaders(),
+        },
         body: formData,
       });
 
@@ -152,7 +182,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isFormValid() || editingId === null) return;
 
     const parsedInterests = interestsInput
@@ -160,16 +190,47 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
       .map(s => s.trim())
       .filter(Boolean);
 
-    setProfiles(prev =>
-      prev.map(p =>
-        p.id === editingId
-          ? { ...p, ...editForm, interests: parsedInterests }
-          : p
-      )
-    );
+    const formData = new FormData();
 
-    cleanupForm();
-    alert("Изменения сохранены локально (реализуйте PUT/PATCH по аналогии с POST)");
+    formData.append("username", editForm.username!.trim());
+    formData.append("age", String(editForm.age!));
+    formData.append("bio", editForm.bio!.trim());
+    formData.append("favoriteAnime", (editForm.favoriteAnime || "Не указано").trim());
+    formData.append("interests", JSON.stringify(parsedInterests));
+
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+    if (videoFile) {
+      formData.append("video", videoFile);
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.update(editingId)}`, {
+        method: "PUT",
+        headers: {
+          ...getAuthHeaders(),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Ошибка сервера: ${response.status}`);
+      }
+
+      const updatedChan = await response.json();
+
+      setProfiles(prev =>
+        prev.map(p => (p.id === editingId ? updatedChan : p))
+      );
+
+      cleanupForm();
+      alert("Изменения сохранены");
+    } catch (error: any) {
+      console.error("Ошибка обновления тянки:", error);
+      alert("Не удалось сохранить изменения: " + (error.message || "неизвестная ошибка"));
+    }
   };
 
   const cleanupForm = () => {
@@ -186,10 +247,27 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
     setInterestsInput("");
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm("Удалить эту тянку?")) return;
-    setProfiles(prev => prev.filter(p => p.id !== id));
-    // TODO: добавить DELETE запрос на сервер
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.delete(id)}`, {
+        method: "DELETE",
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Ошибка сервера: ${response.status}`);
+      }
+
+      setProfiles(prev => prev.filter(p => p.id !== id));
+    } catch (error: any) {
+      console.error("Ошибка удаления тянки:", error);
+      alert("Не удалось удалить тянку: " + (error.message || "неизвестная ошибка"));
+    }
   };
 
   const filteredProfiles = profiles.filter(profile => {
@@ -208,11 +286,6 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/30 via-pink-900/30 to-blue-900/30 p-6 md:p-8">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-16 left-8 text-6xl animate-pulse opacity-20">🌸</div>
-        <div className="absolute bottom-20 right-12 text-7xl animate-float opacity-20 delay-500">✨</div>
-      </div>
-
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -241,13 +314,13 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                 <label className="block text-gray-300 mb-2 font-medium">Аватар</label>
                 {previewAvatar ? (
                   <div className="relative w-48 h-48 rounded-xl overflow-hidden group shadow-md">
-                    <img src={previewAvatar} alt="avatar" className="object-cover w-full h-full" />
+                    <img src={resolveMediaUrl(previewAvatar)} alt="avatar" className="object-cover w-full h-full" />
                     <button
                       onClick={() => {
                         if (previewAvatar.startsWith("blob:")) URL.revokeObjectURL(previewAvatar);
                         setPreviewAvatar(null);
                         setAvatarFile(null);
-                        setEditForm(p => ({ ...p, avatar: undefined }));
+                        setEditForm((p: Partial<Chan>) => ({ ...p, avatar: undefined }));
                       }}
                       className="absolute top-3 right-3 p-2 bg-red-600/90 rounded-full opacity-0 group-hover:opacity-100 transition"
                     >
@@ -284,13 +357,13 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                 <label className="block text-gray-300 mb-2 font-medium">Видео-приветствие</label>
                 {previewVideo ? (
                   <div className="relative w-full max-w-xs rounded-xl overflow-hidden group shadow-md">
-                    <video src={previewVideo} controls className="w-full h-40 object-cover" />
+                    <video src={resolveMediaUrl(previewVideo)} controls className="w-full h-40 object-cover" />
                     <button
                       onClick={() => {
                         if (previewVideo.startsWith("blob:")) URL.revokeObjectURL(previewVideo);
                         setPreviewVideo(null);
                         setVideoFile(null);
-                        setEditForm(p => ({ ...p, video: undefined }));
+                        setEditForm((p: Partial<Chan>) => ({ ...p, video: undefined }));
                       }}
                       className="absolute top-3 right-3 p-2 bg-red-600/90 rounded-full opacity-0 group-hover:opacity-100 transition"
                     >
@@ -329,7 +402,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                 <label className="block text-gray-300 mb-1.5 font-medium">Имя</label>
                 <input
                   value={editForm.username || ""}
-                  onChange={e => setEditForm(p => ({ ...p, username: e.target.value }))}
+                  onChange={e => setEditForm((p: Partial<Chan>) => ({ ...p, username: e.target.value }))}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 transition"
                   placeholder="Имя тянки"
                 />
@@ -345,12 +418,12 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                   onChange={e => {
                     const v = e.target.value;
                     if (v === "") {
-                      setEditForm(p => ({ ...p, age: undefined }));
+                      setEditForm((p: Partial<Chan>) => ({ ...p, age: undefined }));
                       return;
                     }
                     const n = parseInt(v, 10);
                     if (isNaN(n)) return;
-                    setEditForm(p => ({ ...p, age: Math.max(18, Math.min(120, n)) }));
+                    setEditForm((p: Partial<Chan>) => ({ ...p, age: Math.max(18, Math.min(120, n)) }));
                   }}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 transition"
                   placeholder="18–120"
@@ -361,7 +434,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                 <label className="block text-gray-300 mb-1.5 font-medium">Био</label>
                 <textarea
                   value={editForm.bio || ""}
-                  onChange={e => setEditForm(p => ({ ...p, bio: e.target.value }))}
+                  onChange={e => setEditForm((p: Partial<Chan>) => ({ ...p, bio: e.target.value }))}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 min-h-[100px] transition"
                   placeholder="Короткое описание..."
                 />
@@ -371,7 +444,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                 <label className="block text-gray-300 mb-1.5 font-medium">Любимое аниме</label>
                 <input
                   value={editForm.favoriteAnime || ""}
-                  onChange={e => setEditForm(p => ({ ...p, favoriteAnime: e.target.value }))}
+                  onChange={e => setEditForm((p: Partial<Chan>) => ({ ...p, favoriteAnime: e.target.value }))}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 transition"
                   placeholder="Например: Jujutsu Kaisen"
                 />
@@ -452,6 +525,13 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
         </div>
 
         <div className="space-y-5">
+          {loadingProfiles && !isAdding && (
+            <div className="flex items-center justify-center py-12 text-gray-300">
+              <Loader2 className="mr-3 animate-spin" size={22} />
+              Загрузка тянок...
+            </div>
+          )}
+
           {filteredProfiles.length === 0 && !isAdding && (
             <div className="text-center py-20">
               <p className="text-6xl mb-6">😿</p>
@@ -473,12 +553,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
               <div className="flex flex-col sm:flex-row gap-5 items-start">
                 <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-pink-500/30 to-purple-500/30 group">
                   {profile.avatar && (
-                    <img src={profile.avatar} alt={profile.username} className="w-full h-full object-cover" />
-                  )}
-                  {profile.video && (
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                      <Play size={32} className="text-white" />
-                    </div>
+                    <img src={resolveMediaUrl(profile.avatar)} alt={profile.username} className="w-full h-full object-cover" />
                   )}
                 </div>
 
@@ -518,7 +593,7 @@ export default function AdminPanel({ initialProfiles, onProfilesChange }: AdminP
                   <p className="text-gray-400 mt-3 line-clamp-3">{profile.bio}</p>
 
                   <div className="flex flex-wrap gap-2 mt-4">
-                    {profile.interests.map((int, i) => (
+                    {profile.interests.map((int: string, i: number) => (
                       <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300">
                         #{int}
                       </span>

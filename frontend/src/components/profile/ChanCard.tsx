@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import type { Chan } from "@shared/Profile"
 import type { ChanCardProps } from "../../types/Profile"
+import { resolveMediaUrl } from "../../utils/media"
 
 export default function ChanCard({
   chan,
@@ -9,21 +10,12 @@ export default function ChanCard({
   onSkip
 }: ChanCardProps) {
   const [imageError, setImageError] = useState(false)
+  const avatarSrc = resolveMediaUrl(chan.avatar)
 
   const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (!onLike) return
     onLike(chan)
-
-    const heart = document.createElement("div")
-    heart.innerHTML = "❤️"
-    heart.className = "fixed text-5xl animate-heart-beat pointer-events-none"
-    heart.style.left = "50%"
-    heart.style.top = "50%"
-    heart.style.transform = "translate(-50%, -50%)"
-
-    document.body.appendChild(heart)
-    setTimeout(() => heart.remove(), 1200)
   }
 
   const handleSkipClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -33,88 +25,78 @@ export default function ChanCard({
   }
 
   return (
-    <div className="relative w-full h-full min-h-[600px] max-w-[450px]  max-h-[600px]  bg-anime-card bg-opacity-80 backdrop-blur-lg border border-anime-primary border-opacity-30 rounded-2xl shadow-2xl overflow-hidden animate-slide-up flex flex-col">
-
-      <div className="relative w-full h-80 overflow-hidden">
+    <div className="relative flex h-full min-h-[600px] max-h-[600px] w-full max-w-[450px] min-w-[355px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-anime-card/85 p-6 shadow-2xl backdrop-blur-lg animate-slide-up">
+      <div className="mb-5 flex flex-col items-center text-center">
         {!imageError ? (
           <img
-            src={chan.avatar}
+            src={avatarSrc}
             alt={chan.username}
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover"
+            className="h-32 w-32 shrink-0 rounded-full border border-white/15 object-cover shadow-lg"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-anime-background text-6xl">
+          <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-anime-background text-5xl shadow-lg">
             🫠
           </div>
         )}
-        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <div className="absolute inset-0 border-2 border-anime-primary border-opacity-40 rounded-t-2xl pointer-events-none"></div>
-      </div>
 
-      <div className="p-6 flex flex-col flex-1">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-3xl font-bold text-anime-text font-anime">
-            {chan.username}
-          </h2>
+        <div className="mt-4 min-w-0 w-full">
+          <div className="mb-2 flex flex-col items-center gap-2">
+            <h2 className="truncate text-3xl font-bold text-anime-text">
+              {chan.username}
+            </h2>
 
-          <span className="bg-anime-background text-anime-textSoft px-4 py-2 rounded-full text-sm border border-anime-primary border-opacity-30">
-            {chan.age} лет
-          </span>
-        </div>
-
-        <div className="flex flex-wrap content-start gap-2 mb-4 min-h-[64px]">
-          {chan.interests?.map((interest: string, i: number) => (
-            <span
-              key={i}
-              className="
-                bg-gradient-to-r from-anime-primary to-anime-secondary 
-                text-white px-3 py-1 rounded-full text-sm
-                border border-white/30
-                shadow-md shadow-anime-primary/30
-                backdrop-blur-sm
-                transition hover:scale-105 hover:shadow-lg
-              "
-            >
-              {interest}
-            </span>
-          ))}
-        </div>
-
-        <p className="text-anime-textSoft mb-4 border-l-4 border-anime-primary pl-4 italic line-clamp-3 min-h-[78px]">
-          {chan.bio || "Этот отаку пока не написал о себе..."}
-        </p>
-
-        {chan.favoriteAnime && (
-          <div className="bg-anime-background p-3 rounded-xl border border-anime-primary border-opacity-30 mb-4">
-            <span className="text-anime-textSoft text-sm block">
-              Любимое аниме
-            </span>
-            <span className="text-anime-text font-bold">
-              🎬 {chan.favoriteAnime}
+            <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-anime-textSoft">
+              {chan.age} лет
             </span>
           </div>
-        )}
 
-        <div className="flex justify-center gap-6 mt-auto pt-4">
-          {onSkip && (
-            <button
-              onClick={handleSkipClick}
-              className="bg-red-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl transition hover:scale-110 shadow-xl"
-            >
-              ✕
-            </button>
-          )}
-
-          {onLike && (
-            <button
-              onClick={handleLikeClick}
-              className="bg-gradient-to-r from-anime-primary to-anime-secondary text-white w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl transition hover:scale-110 animate-pulse-glow"
-            >
-              ❤️
-            </button>
+          {chan.favoriteAnime && (
+            <p className="text-sm text-anime-textSoft">
+              Любимое аниме: <span className="font-semibold text-anime-text">{chan.favoriteAnime}</span>
+            </p>
           )}
         </div>
+      </div>
+
+      <div className="mb-5 flex min-h-[48px] flex-wrap content-start gap-2">
+        {chan.interests?.map((interest: string, i: number) => (
+          <span
+            key={i}
+            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-anime-textSoft"
+          >
+            {interest}
+          </span>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-white/8 bg-black/10 p-4">
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-anime-textSoft/70">
+          О себе
+        </p>
+        <p className="min-h-[96px] text-sm leading-6 text-anime-textSoft">
+          {chan.bio || "Этот отаку пока не написал о себе..."}
+        </p>
+      </div>
+
+      <div className="mt-auto flex justify-center gap-4 pt-3">
+        {onSkip && (
+          <button
+            onClick={handleSkipClick}
+            className="flex h-16 w-16 aspect-square items-center justify-center rounded-full border border-white/18 bg-white/8 text-[1.6rem] text-anime-text shadow-[0_14px_30px_rgba(0,0,0,0.24)] backdrop-blur-xl transition hover:scale-105 hover:bg-white/12"
+          >
+            ✕
+          </button>
+        )}
+
+        {onLike && (
+          <button
+            onClick={handleLikeClick}
+            className="flex h-16 w-16 aspect-square items-center justify-center rounded-full border border-pink-200/45 bg-gradient-to-br from-anime-primary/80 via-anime-accent/70 to-anime-secondary/75 text-[1.6rem] text-white shadow-[0_18px_38px_rgba(255,20,147,0.42)] backdrop-blur-xl transition hover:scale-105 hover:brightness-110"
+          >
+            ❤️
+          </button>
+        )}
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import type { Chan } from "@shared/Profile"
 import type { MatchListProps } from "../../types/Match.ts"
+import { resolveMediaUrl } from "../../utils/media"
 
 export default function MatchList({ matches }: MatchListProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -39,7 +40,7 @@ export default function MatchList({ matches }: MatchListProps) {
               >
                 <div className="relative">
                   <img
-                    src={match.avatar}
+                    src={resolveMediaUrl(match.avatar)}
                     alt={match.username}
                     className="w-16 h-16 rounded-full object-cover border-4 border-anime-primary border-opacity-50 group-hover:border-opacity-100 transition-all duration-300"
                   />

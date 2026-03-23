@@ -10,7 +10,7 @@ export const ROUTES = {
     logout: '/auth/logout',
   },
   users: {
-    profile: '/users/profile',
+    profile: '/user/profile',
     all: '/user/all',           
     update: (id: string | number) => `/user/update/${id}`,
     logout: '/user/logout',
@@ -19,6 +19,8 @@ export const ROUTES = {
     all: '/girls/all',
     unliked: '/girls/unliked',
     create: '/girls/create',
+    update: (id: number | string) => `/girls/update/${id}`,
+    delete: (id: number | string) => `/girls/${id}`,
     like: (id: number | string) => `/girls/${id}/like`,
     unlike: (id: number | string) => `/girls/${id}/unlike`,
     dislike: (id: number | string) => `/girls/${id}/dislike`,

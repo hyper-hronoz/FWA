@@ -83,7 +83,7 @@ export default function Auth({ mode }: AuthProps) {
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-anime-background to-purple-900 flex">
       <div className="video flex-1 relative min-h-screen">
-        <WelcomeVideo videoSrc="/static/videos/index.mp4"/>
+        <WelcomeVideo videoSrc="/videos/test1.mp4" />
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 text-6xl animate-float">🌸</div>
