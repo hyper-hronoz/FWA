@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY frontend/package*.json ./
 
-COPY shared ./shared
+COPY shared /shared
 
 RUN npm install
 

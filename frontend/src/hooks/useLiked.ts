@@ -14,7 +14,6 @@ export function useLiked() {
     const token = localStorage.getItem("animeAccessToken");
     return {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
     };
   };
 

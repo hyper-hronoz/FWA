@@ -12,11 +12,11 @@ export function useChan() {
   const [likedProfiles, setLikedProfiles] = useState<Chan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (includeJsonContentType = false) => {
     const token = localStorage.getItem("animeAccessToken");
     return {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      ...(includeJsonContentType ? { "Content-Type": "application/json" } : {}),
     };
   };
 

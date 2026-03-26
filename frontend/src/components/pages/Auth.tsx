@@ -11,6 +11,10 @@ export default function Auth({ mode }: AuthProps) {
   const navigate = useNavigate()
   const {user, login, register, loading } = useAuthContext()
   const isLogin = mode === 'login'
+  const authVideoSrc =
+    typeof window === 'undefined'
+      ? 'static/videos/index.mp4'
+      : new URL('/static/videos/index.mp4', window.location.origin).toString()
 
   const [formData, setFormData] = useState({
     username: '',
@@ -83,7 +87,7 @@ export default function Auth({ mode }: AuthProps) {
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-anime-background to-purple-900 flex">
       <div className="video flex-1 relative min-h-screen">
-        <WelcomeVideo videoSrc="/videos/test1.mp4" />
+        <WelcomeVideo videoSrc={authVideoSrc} />
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 text-6xl animate-float">🌸</div>
