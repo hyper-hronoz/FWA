@@ -115,6 +115,7 @@ export const getUnlikedGirls = async (req: Request, res: Response) => {
          FROM user_girl_likes l
          WHERE l.girl_id = g.id
            AND l.user_id = ?
+           AND l.liked = 1
        )
        ORDER BY g.id ASC
        LIMIT ? OFFSET ?`,
@@ -129,6 +130,7 @@ export const getUnlikedGirls = async (req: Request, res: Response) => {
          FROM user_girl_likes l
          WHERE l.girl_id = g.id
            AND l.user_id = ?
+           AND l.liked = 1
        )`,
       [userId]
     );

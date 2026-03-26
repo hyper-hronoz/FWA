@@ -1,6 +1,5 @@
 import { useState } from "react"
 
-import type { Chan } from "@shared/Profile"
 import type { ChanCardProps } from "../../types/Profile"
 import { resolveMediaUrl } from "../../utils/media"
 

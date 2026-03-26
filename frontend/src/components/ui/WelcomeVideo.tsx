@@ -4,12 +4,13 @@ import { resolveMediaUrl } from '../../utils/media'
 
 interface WelcomeVideoProps {
   videoSrc: string
+  resolveSrc?: boolean
 }
 
-export const WelcomeVideo = ({ videoSrc }: WelcomeVideoProps) => {
+export const WelcomeVideo = ({ videoSrc, resolveSrc = true }: WelcomeVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoError, setVideoError] = useState(false)
-  const resolvedVideoSrc = resolveMediaUrl(videoSrc)
+  const resolvedVideoSrc = resolveSrc ? resolveMediaUrl(videoSrc) : videoSrc
 
   useEffect(() => {
     const timer = setTimeout(() => {

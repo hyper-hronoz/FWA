@@ -74,5 +74,33 @@ services:
     depends_on:
       - service-auth
 
+  frontend-rtk:
+    build:
+      context: .
+      dockerfile: frontend-rtk/Dockerfile
+    container_name: react_frontend_rtk_nginx
+    ports:
+      - "81:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./logs/frontend-rtk:/var/log/nginx
+      - ./backend/static/videos:/usr/share/nginx/html/videos
+    depends_on:
+      - service-auth
+
+  frontend-mobx:
+    build:
+      context: .
+      dockerfile: frontend-mobx/Dockerfile
+    container_name: react_frontend_mobx_nginx
+    ports:
+      - "82:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./logs/frontend-mobx:/var/log/nginx
+      - ./backend/static/videos:/usr/share/nginx/html/videos
+    depends_on:
+      - service-auth
+
 volumes:
   mysql_data:

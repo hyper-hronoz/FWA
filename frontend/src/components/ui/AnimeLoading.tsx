@@ -1,4 +1,4 @@
-import React from 'react';
+import type { CSSProperties } from "react";
 
 export default function AnimeLoading() {
   return (
@@ -23,7 +23,7 @@ export default function AnimeLoading() {
   );
 }
 
-const styles: { [key: string]: React.CSSProperties } = {
+const styles: Record<string, CSSProperties> = {
   container: {
     display: 'flex',
     flexDirection: 'column', // ✅ typed correctly now

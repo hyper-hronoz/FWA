@@ -12,7 +12,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],
+      "@state/hooks": ["./src/state/runtime/local"]
     },
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,

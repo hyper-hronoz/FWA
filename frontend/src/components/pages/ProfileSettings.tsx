@@ -2,11 +2,12 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Save, UserRound, Mail, KeyRound, Cake } from "lucide-react"
 
-import { useAuthContext } from "../../context/AuthContext"
+import { useAuthContext, useLiked } from "@state/hooks"
 
 export default function ProfileSettings() {
   const navigate = useNavigate()
   const { user, updateProfile, loading } = useAuthContext()
+  const { likedProfiles } = useLiked()
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -160,6 +161,45 @@ export default function ProfileSettings() {
               Сохранить изменения
             </button>
           </form>
+        </div>
+
+        <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-anime-text">Твои лайкнутые тян</h2>
+              <p className="mt-2 text-sm text-anime-textSoft">
+                Эти данные переиспользуются здесь и на отдельной странице лайков.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-anime-primary/15 px-4 py-2 text-sm text-anime-text">
+              Всего: {likedProfiles.length}
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3">
+            {likedProfiles.slice(0, 3).map((chan) => (
+              <div
+                key={chan.id}
+                className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-anime-text">{chan.username}</p>
+                  <p className="text-xs text-anime-textSoft">
+                    {chan.age} лет • {chan.favoriteAnime}
+                  </p>
+                </div>
+                <span className="text-xs text-anime-textSoft">
+                  #{chan.interests.slice(0, 2).join(" • ") || "без интересов"}
+                </span>
+              </div>
+            ))}
+
+            {likedProfiles.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-sm text-anime-textSoft">
+                Пока нет лайков. Они появятся здесь автоматически после свайпов.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

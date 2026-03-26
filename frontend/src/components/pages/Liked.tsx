@@ -1,28 +1,12 @@
-import React, { useEffect, useState } from "react";
 import ChanCard from "../profile/ChanCard";
-import { useLiked } from "../../hooks/useLiked";
-
-import type { Chan } from "@shared/Profile";
+import { useLiked } from "@state/hooks";
 
 interface LikedProps {
-  onLike: (chan: Chan) => void;
-  onSkip: (chan: Chan) => void;
+  onSkip: (chan: import("@shared/Profile").Chan) => Promise<void>;
 }
 
-export default function Liked({ onLike, onSkip }: LikedProps) {
+export default function Liked({ onSkip }: LikedProps) {
   const { likedProfiles, loading, refetch } = useLiked();
-  const [localProfiles, setLocalProfiles] = useState<Chan[]>([]);
-
-  useEffect(() => {
-    if (likedProfiles) {
-      setLocalProfiles(likedProfiles);
-    }
-  }, [likedProfiles]);
-
-  const handleSkip = async (chan: Chan) => {
-    onSkip(chan);
-    setLocalProfiles((prev) => prev.filter((c) => c.id !== chan.id));
-  };
 
   if (loading) {
     return (
@@ -32,12 +16,12 @@ export default function Liked({ onLike, onSkip }: LikedProps) {
     );
   }
 
-  if (!localProfiles.length) {
+  if (!likedProfiles.length) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-anime-textSoft text-lg gap-4">
         <p>Пока нет лайкнутых тян 😢</p>
         <button
-          onClick={refetch}
+          onClick={() => void refetch()}
           className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
         >
           Попробовать снова
@@ -53,11 +37,11 @@ export default function Liked({ onLike, onSkip }: LikedProps) {
       </h2>
 
       <div className="mx-auto w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {localProfiles.map((chan: Chan) => (
+        {likedProfiles.map((chan) => (
           <div key={chan.id} className="w-full max-w-[360px] h-full">
             <ChanCard
               chan={chan}
-              onSkip={() => handleSkip(chan)}
+              onSkip={() => void onSkip(chan)}
             />
           </div>
         ))}

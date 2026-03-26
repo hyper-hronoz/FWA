@@ -1,6 +1,5 @@
 import { useState } from "react"
 
-import type { Chan } from "@shared/Profile"
 import type { MatchListProps } from "../../types/Match.ts"
 import { resolveMediaUrl } from "../../utils/media"
 

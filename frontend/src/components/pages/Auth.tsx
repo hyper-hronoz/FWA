@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { WelcomeVideo } from '../ui/WelcomeVideo'
-import { useAuth } from '../../hooks/useAuth'
-import { useAuthContext } from '../../context/AuthContext'
+import { useAuthContext } from '@state/hooks'
 import AnimeLoading from "../ui/AnimeLoading.tsx"
+import authVideo from "../../../static/videos/index.mp4"
 
 import type { AuthProps } from '../../types/Auth.ts'
 
@@ -11,10 +11,7 @@ export default function Auth({ mode }: AuthProps) {
   const navigate = useNavigate()
   const {user, login, register, loading } = useAuthContext()
   const isLogin = mode === 'login'
-  const authVideoSrc =
-    typeof window === 'undefined'
-      ? 'static/videos/index.mp4'
-      : new URL('/static/videos/index.mp4', window.location.origin).toString()
+  const authVideoSrc = authVideo
 
   const [formData, setFormData] = useState({
     username: '',
@@ -66,7 +63,7 @@ export default function Auth({ mode }: AuthProps) {
         return
       }
 
-      navigate("/login");
+      navigate("/swipe");
     } else {
       const result = await login({
         email: formData.email,
@@ -87,7 +84,7 @@ export default function Auth({ mode }: AuthProps) {
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-anime-background to-purple-900 flex">
       <div className="video flex-1 relative min-h-screen">
-        <WelcomeVideo videoSrc={authVideoSrc} />
+        <WelcomeVideo videoSrc={authVideoSrc} resolveSrc={false} />
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 text-6xl animate-float">🌸</div>

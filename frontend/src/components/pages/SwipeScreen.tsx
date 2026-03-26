@@ -7,19 +7,10 @@ import { resolveMediaUrl } from "../../utils/media"
 import type { Chan } from "@shared/Profile"
 import type { ChanCardProps } from "../../types/Profile"
 
-export default function SwipeScreen({ chan, onLike, onSkip, refetch }: ChanCardProps & { refetch: () => void }) {
+export default function SwipeScreen({ chan, onLike, onSkip }: ChanCardProps) {
   const elementRef = useRef<HTMLDivElement>(null)
-  const hasRetried = useRef(false)
   const transitionTimerRef = useRef<number | null>(null)
   const [transitionState, setTransitionState] = useState<"idle" | "liking" | "skipping" | "entering">("idle")
-
-  useEffect(() => {
-    if (!chan && !hasRetried.current) {
-      console.log("No more profiles, retrying fetch...")
-      hasRetried.current = true
-      refetch()
-    }
-  }, [chan, refetch])
 
   useEffect(() => {
     if (!chan) return
@@ -129,8 +120,8 @@ export default function SwipeScreen({ chan, onLike, onSkip, refetch }: ChanCardP
         <div className={`relative z-10 ${cardTransitionClass}`}>
           <ChanCard
             chan={chan}
-            onLike={onLike ? (currentChan) => runCardTransition("liking", onLike) : undefined}
-            onSkip={onSkip ? (currentChan) => runCardTransition("skipping", onSkip) : undefined}
+            onLike={onLike ? () => runCardTransition("liking", onLike) : undefined}
+            onSkip={onSkip ? () => runCardTransition("skipping", onSkip) : undefined}
           />
         </div>
       </div>

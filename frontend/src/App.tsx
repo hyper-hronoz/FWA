@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Auth from "./components/pages/Auth";
@@ -7,21 +8,18 @@ import BackgroundEffects from "./components/layout/BackgroundEffects";
 import FinishScreen from "./components/pages/FinishScreen";
 import SwipeScreen from "./components/pages/SwipeScreen";
 
-import MatchList from "./components/profile/MatchList";
 import AdminPanel from "./components/admin/AdminPanel";
 import Liked from "./components/pages/Liked";
 import ProfileSettings from "./components/pages/ProfileSettings";
 
-import { AuthProvider, useAuthContext } from "./context/AuthContext";
+import { AppStateProvider, useAuthContext, useChan, useLiked } from "@state/hooks";
 import { ProtectedRoute, GuestRoute, AdminRoute } from "./routing/ProtectedRoute";
-
-import { useChan } from "./hooks/useChan.ts";
 
 function AppWrapper() {
   return (
-    <AuthProvider>
+    <AppStateProvider>
       <App />
-    </AuthProvider>
+    </AppStateProvider>
   );
 }
 
@@ -31,12 +29,9 @@ function App() {
   const {
     availableProfiles,
     matches,
-    likedProfiles,
-    loading,
     handleLike,
     handleSkip,
-    handleRestart,
-    refetch
+    handleRestart
   } = useChan();
 
   return (
@@ -62,23 +57,13 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route
                 path="/swipe"
-                element={
-                  <SwipeScreen
-                    chan={availableProfiles[0]}
-                    onLike={handleLike}
-                    onSkip={handleSkip}
-                    refetch={refetch}
-                  />
-                }
+                element={<SwipeRoute />}
               />
 
               <Route element={<ProtectedRoute />}>
-               <Route
-                  path="/liked"
-                  element={<Liked 
-                    onLike={handleLike}
-                    onSkip={handleSkip}
-                  />}
+              <Route
+                path="/liked"
+                element={<LikedRoute onSkip={handleSkip} />}
                 />
               </Route>
 
@@ -116,6 +101,32 @@ function App() {
       </div>
     </BrowserRouter>
   );
+}
+
+function SwipeRoute() {
+  const { availableProfiles, handleLike, handleSkip, refetch } = useChan();
+
+  useEffect(() => {
+    void refetch();
+  }, []);
+
+  return (
+    <SwipeScreen
+      chan={availableProfiles[0]}
+      onLike={handleLike}
+      onSkip={handleSkip}
+    />
+  );
+}
+
+function LikedRoute({ onSkip }: { onSkip: (profile: import("@shared/Profile").Chan) => Promise<void> }) {
+  const { refetch } = useLiked();
+
+  useEffect(() => {
+    void refetch();
+  }, []);
+
+  return <Liked onSkip={onSkip} />;
 }
 
 export default AppWrapper;

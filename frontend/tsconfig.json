@@ -4,7 +4,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],
+      "@state/hooks": ["./src/state/runtime/local"]
     }
   }
 }

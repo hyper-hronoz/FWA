@@ -4,18 +4,18 @@ import {
   Pencil, Trash2, Plus, Save, X,
   Search, Video, Loader2, Camera
 } from "lucide-react";
-import { API_BASE_URL, ROUTES } from "../../config/api";
 import { resolveMediaUrl } from "../../utils/media";
+import { useAdminGirls } from "@state/hooks";
 import type { Chan } from "@shared/Profile";
+import type { GirlFormInput } from "../../state/contracts";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
-  const [profiles, setProfiles] = useState<Chan[]>([]);
+  const { profiles, loadingProfiles, createGirl, updateGirl, deleteGirl } = useAdminGirls();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAge, setFilterAge] = useState<string>("all");
-  const [loadingProfiles, setLoadingProfiles] = useState(true);
 
   const [editForm, setEditForm] = useState<Partial<Chan>>({});
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
@@ -33,39 +33,18 @@ export default function AdminPanel() {
       setInterestsInput(editForm.interests?.join(", ") || "");
     }
   }, [editingId, isAdding, editForm.interests]);
-
-  useEffect(() => {
-    fetchProfiles();
-  }, []);
-
-  const getAuthHeaders = (): Record<string, string> => {
-    const token = localStorage.getItem("animeAccessToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
-  const fetchProfiles = async () => {
-    try {
-      setLoadingProfiles(true);
-
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.all}?page=1&limit=100`, {
-        headers: {
-          ...getAuthHeaders(),
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
-      }
-
-      const result = await response.json();
-      setProfiles(Array.isArray(result.data) ? result.data : []);
-    } catch (error) {
-      console.error("Ошибка загрузки тянок:", error);
-      alert("Не удалось загрузить список тянок");
-    } finally {
-      setLoadingProfiles(false);
-    }
-  };
+  const toGirlInput = (): GirlFormInput => ({
+    username: editForm.username?.trim() || "",
+    age: Number(editForm.age || 18),
+    bio: editForm.bio?.trim() || "",
+    favoriteAnime: (editForm.favoriteAnime || "Не указано").trim(),
+    interests: interestsInput
+      .split(/[\s,#]+/)
+      .map((item) => item.trim())
+      .filter(Boolean),
+    avatarFile,
+    videoFile,
+  });
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -134,102 +113,28 @@ export default function AdminPanel() {
       return;
     }
 
-    const parsedInterests = interestsInput
-      .split(/[\s,#]+/)
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    const formData = new FormData();
-
-    formData.append("username", editForm.username!.trim());
-    formData.append("age", String(editForm.age!));
-    formData.append("bio", editForm.bio!.trim());
-    formData.append("favoriteAnime", (editForm.favoriteAnime || "Не указано").trim());
-    formData.append("interests", JSON.stringify(parsedInterests));
-
-    if (avatarFile) {
-      formData.append("avatar", avatarFile);
-    }
-    if (videoFile) {
-      formData.append("video", videoFile);
-    }
-
-    console.log(formData)
-
     try {
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.create}`, {
-        method: "POST",
-        headers: {
-          ...getAuthHeaders(),
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Ошибка сервера: ${response.status}`);
-      }
-
-      const newChan = await response.json();
-
-      setProfiles(prev => [...prev, newChan]);
+      await createGirl(toGirlInput());
       cleanupForm();
-
       alert("Тянка успешно добавлена!");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "неизвестная ошибка";
       console.error("Ошибка добавления тянки:", err);
-      alert("Не удалось добавить тянку: " + (err.message || "неизвестная ошибка"));
+      alert(`Не удалось добавить тянку: ${message}`);
     }
   };
 
   const handleSave = async () => {
     if (!isFormValid() || editingId === null) return;
 
-    const parsedInterests = interestsInput
-      .split(/[\s,#]+/)
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    const formData = new FormData();
-
-    formData.append("username", editForm.username!.trim());
-    formData.append("age", String(editForm.age!));
-    formData.append("bio", editForm.bio!.trim());
-    formData.append("favoriteAnime", (editForm.favoriteAnime || "Не указано").trim());
-    formData.append("interests", JSON.stringify(parsedInterests));
-
-    if (avatarFile) {
-      formData.append("avatar", avatarFile);
-    }
-    if (videoFile) {
-      formData.append("video", videoFile);
-    }
-
     try {
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.update(editingId)}`, {
-        method: "PUT",
-        headers: {
-          ...getAuthHeaders(),
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Ошибка сервера: ${response.status}`);
-      }
-
-      const updatedChan = await response.json();
-
-      setProfiles(prev =>
-        prev.map(p => (p.id === editingId ? updatedChan : p))
-      );
-
+      await updateGirl(editingId, toGirlInput());
       cleanupForm();
       alert("Изменения сохранены");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "неизвестная ошибка";
       console.error("Ошибка обновления тянки:", error);
-      alert("Не удалось сохранить изменения: " + (error.message || "неизвестная ошибка"));
+      alert(`Не удалось сохранить изменения: ${message}`);
     }
   };
 
@@ -251,22 +156,11 @@ export default function AdminPanel() {
     if (!window.confirm("Удалить эту тянку?")) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.delete(id)}`, {
-        method: "DELETE",
-        headers: {
-          ...getAuthHeaders(),
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Ошибка сервера: ${response.status}`);
-      }
-
-      setProfiles(prev => prev.filter(p => p.id !== id));
-    } catch (error: any) {
+      await deleteGirl(id);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "неизвестная ошибка";
       console.error("Ошибка удаления тянки:", error);
-      alert("Не удалось удалить тянку: " + (error.message || "неизвестная ошибка"));
+      alert(`Не удалось удалить тянку: ${message}`);
     }
   };
 

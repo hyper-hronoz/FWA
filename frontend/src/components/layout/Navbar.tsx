@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom" 
-
-import type { User } from "@shared/Profile"
 import type { NavbarProps } from "../../types/Navbar"
 
 export default function Navbar({
@@ -33,6 +31,10 @@ export default function Navbar({
             >
               ❤️ Лайкнутые тян
             </button>
+
+            <span className="hidden lg:inline rounded-full bg-white/10 px-3 py-1 text-xs text-anime-textSoft">
+              Осталось анкет: {totalProfiles}
+            </span>
 
             <span className="hidden sm:inline text-anime-textSoft font-cute">
               {user.username}
