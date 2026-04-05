@@ -1,8 +1,6 @@
 import { body } from "express-validator/lib/middlewares/validation-chain-builders";
 
-// ======================
-// CREATE GIRL VALIDATION
-// ======================
+
 export const createGirlValidation = [
   body("username")
     .notEmpty()

@@ -41,7 +41,7 @@ const createProxy = (baseUrl: string) => {
           ...req.headers,
           host: undefined,
         },
-        validateStatus: () => true, // важно: не падать на 4xx/5xx
+        validateStatus: () => true, 
         maxBodyLength: Infinity,
         maxContentLength: Infinity,
       });

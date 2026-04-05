@@ -108,26 +108,6 @@ router.get("/all", getAllUsers);
  */
 router.put("/update/:id", updateUser);
 
-/**
- * @swagger
- * /user/logout:
- *   post:
- *     summary: Выход пользователя (удаление токена на фронте)
- *     tags: [User]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Пользователь успешно вышел
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Logged out. Delete token on client."
- */
 router.post("/logout", logOut);
 
 export default router;
