@@ -7,6 +7,7 @@ import {
 } from "@reduxjs/toolkit/query/react"
 
 import { API_BASE_URL, ROUTES } from "../../config/api"
+import { normalizeGirlListPayload } from "../../utils/girlListPayload"
 import { persistTokens, readAccessToken, readRefreshToken, wipeTokens } from "../authStorage"
 import { setSessionUser } from "../sessionSlice"
 
@@ -154,7 +155,7 @@ export const backendApi = createApi({
 
     getFavorites: builder.query<Chan[], void>({
       query: () => ROUTES.girls.liked,
-      transformResponse: (response: { data: Chan[] }) => response.data ?? [],
+      transformResponse: (response: unknown) => normalizeGirlListPayload(response),
       providesTags: ["Favorites"],
     }),
 

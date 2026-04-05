@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx"
 
 import { API_BASE_URL, ROUTES } from "../config/api"
+import { normalizeGirlListPayload } from "../utils/girlListPayload"
 
 import type { Chan, User } from "@shared/Profile"
 import type { AuthResponse, LoginData, RegisterData } from "@shared/Auth"
@@ -310,9 +311,9 @@ export class ApplicationStore {
     try {
       const res = await this.authorizedFetch(`${API_BASE_URL}${ROUTES.girls.liked}`)
       if (!res.ok) throw new Error("liked")
-      const json = (await res.json()) as { data: Chan[] }
+      const body: unknown = await res.json()
       runInAction(() => {
-        this.favoriteChans = json.data ?? []
+        this.favoriteChans = normalizeGirlListPayload(body)
         this.favoriteStamp = Date.now()
       })
     } catch {

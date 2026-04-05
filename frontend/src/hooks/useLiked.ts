@@ -1,4 +1,5 @@
 import { API_BASE_URL, ROUTES } from "../config/api";
+import { normalizeGirlListPayload } from "../utils/girlListPayload";
 
 import { useState, useEffect } from "react";
 import { useAuthContext } from "../context/AuthContext";
@@ -26,11 +27,8 @@ export function useLiked() {
 
       if (!res.ok) throw new Error("Ошибка загрузки лайкнутых тян");
 
-      const data = await res.json();
-      
-      console.log("[LIKED GIRLS]", data)
-
-      setLikedProfiles(data);
+      const data: unknown = await res.json();
+      setLikedProfiles(normalizeGirlListPayload(data));
     } catch (err) {
       console.error("Ошибка получения лайкнутых профилей:", err);
       setLikedProfiles([]);

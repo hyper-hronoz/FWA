@@ -1,0 +1,144 @@
+:root {
+  --background: #e8f8f7;
+  --foreground: #073b3a;
+  --primary: #0f8b8d;
+  --card: #f3fffe;
+  --border: #9bd5d2;
+  --header-bg: #d7f3f1;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--foreground);
+  background: linear-gradient(180deg, #dff7f6 0%, var(--background) 100%);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+}
+
+.site-header {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  min-height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.nav {
+  display: flex;
+  gap: 16px;
+  font-weight: 600;
+}
+
+.main-content {
+  padding: 32px 0;
+}
+
+.hero,
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 24px rgba(15, 139, 141, 0.08);
+}
+
+.hero h1 {
+  margin-bottom: 12px;
+}
+
+.hero p {
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  margin: 28px 0 14px;
+  font-size: 1.4rem;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card h3 {
+  margin-bottom: 8px;
+}
+
+.card p {
+  line-height: 1.5;
+}
+
+.site-footer {
+  margin-top: 24px;
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  background: var(--header-bg);
+}
+
+.site-footer p {
+  font-size: 0.92rem;
+}
+
+.contact-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #ffffff;
+}
+
+.contact-form button {
+  width: fit-content;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav a:hover,
+.brand:hover {
+  opacity: 0.82;
+}
+
+.contact-form button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
