@@ -3,10 +3,26 @@ import type { Chan, User } from "@shared/Profile";
 import type { GirlFormInput, UpdateProfileInput } from "../../../frontend/src/state/contracts";
 import { authStorage } from "../../../frontend/src/state/shared/authStorage";
 import { appServices } from "../../../frontend/src/state/shared/services";
+import { ApiError } from "../../../frontend/src/state/shared/apiClient";
 
 const CACHE_TTL = 60_000;
 
 const isFresh = (timestamp: number) => Date.now() - timestamp < CACHE_TTL;
+
+const summarizeProfiles = (profiles: Chan[]) => ({
+  length: profiles.length,
+  ids: profiles.slice(0, 5).map((profile) => profile.id),
+});
+
+const logMobxCache = (scope: string, payload: Record<string, unknown>) => {
+  console.info(`[MobX cache] ${scope}`, payload);
+};
+
+const logMobxResult = (scope: string, payload: Record<string, unknown>) => {
+  console.info(`[MobX result] ${scope}`, payload);
+};
+
+const isAuthError = (error: unknown) => error instanceof ApiError && (error.status === 401 || error.status === 403);
 
 export class AppStore {
   user: User | null = authStorage.getSavedUser();
@@ -26,6 +42,31 @@ export class AppStore {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
+  private resetSession() {
+    authStorage.clear();
+    this.user = null;
+    this.availableProfiles = [];
+    this.likedProfiles = [];
+    this.adminProfiles = [];
+    this.matches = [];
+    this.girlsFetchedAt = 0;
+    this.likedFetchedAt = 0;
+    this.adminFetchedAt = 0;
+  }
+
+  private handleAuthError(error: unknown, scope: string) {
+    if (!isAuthError(error)) {
+      return false;
+    }
+
+    runInAction(() => {
+      this.resetSession();
+    });
+
+    console.warn(`[MobX auth] ${scope}`, error instanceof Error ? error.message : error);
+    return true;
+  }
+
   async bootstrapAuth() {
     const hasSession = Boolean(
       authStorage.getAccessToken() || authStorage.getRefreshToken() || authStorage.getSavedUser(),
@@ -43,14 +84,22 @@ export class AppStore {
       runInAction(() => {
         this.authLoading = true;
       });
+      logMobxCache("bootstrapAuth before request", {
+        user: this.user ? { id: this.user.id, is_admin: this.user.is_admin } : null,
+      });
       const currentUser = await appServices.me();
       runInAction(() => {
         this.user = currentUser;
       });
-    } catch {
-      runInAction(() => {
-        this.user = authStorage.getSavedUser();
+      logMobxResult("bootstrapAuth after request", {
+        user: currentUser ? { id: currentUser.id, is_admin: currentUser.is_admin } : null,
       });
+    } catch (error) {
+      if (!this.handleAuthError(error, "bootstrapAuth")) {
+        runInAction(() => {
+          this.user = authStorage.getSavedUser();
+        });
+      }
     } finally {
       runInAction(() => {
         this.authLoading = false;
@@ -63,7 +112,22 @@ export class AppStore {
       return;
     }
 
-    if (!force && isFresh(this.girlsFetchedAt) && isFresh(this.likedFetchedAt)) {
+    const girlsFresh = isFresh(this.girlsFetchedAt);
+    const likedFresh = isFresh(this.likedFetchedAt);
+
+    logMobxCache("ensureSwipeData before request", {
+      force,
+      girlsFresh,
+      likedFresh,
+      availableProfiles: summarizeProfiles(this.availableProfiles),
+      likedProfiles: summarizeProfiles(this.likedProfiles),
+    });
+
+    if (!force && girlsFresh && likedFresh) {
+      logMobxResult("ensureSwipeData served from cache", {
+        availableProfiles: summarizeProfiles(this.availableProfiles),
+        likedProfiles: summarizeProfiles(this.likedProfiles),
+      });
       return;
     }
 
@@ -81,6 +145,14 @@ export class AppStore {
         this.girlsFetchedAt = Date.now();
         this.likedFetchedAt = Date.now();
       });
+      logMobxResult("ensureSwipeData after request", {
+        availableProfiles: summarizeProfiles(availableProfiles),
+        likedProfiles: summarizeProfiles(likedProfiles),
+      });
+    } catch (error) {
+      if (!this.handleAuthError(error, "ensureSwipeData")) {
+        throw error;
+      }
     } finally {
       runInAction(() => {
         this.girlsLoading = false;
@@ -93,7 +165,18 @@ export class AppStore {
       return;
     }
 
-    if (!force && isFresh(this.likedFetchedAt)) {
+    const likedFresh = isFresh(this.likedFetchedAt);
+
+    logMobxCache("ensureLiked before request", {
+      force,
+      likedFresh,
+      likedProfiles: summarizeProfiles(this.likedProfiles),
+    });
+
+    if (!force && likedFresh) {
+      logMobxResult("ensureLiked served from cache", {
+        likedProfiles: summarizeProfiles(this.likedProfiles),
+      });
       return;
     }
 
@@ -105,6 +188,13 @@ export class AppStore {
         this.likedProfiles = likedProfiles;
         this.likedFetchedAt = Date.now();
       });
+      logMobxResult("ensureLiked after request", {
+        likedProfiles: summarizeProfiles(likedProfiles),
+      });
+    } catch (error) {
+      if (!this.handleAuthError(error, "ensureLiked")) {
+        throw error;
+      }
     } finally {
       runInAction(() => {
         this.likedLoading = false;
@@ -117,7 +207,18 @@ export class AppStore {
       return;
     }
 
-    if (!force && isFresh(this.adminFetchedAt)) {
+    const adminFresh = isFresh(this.adminFetchedAt);
+
+    logMobxCache("ensureAdminGirls before request", {
+      force,
+      adminFresh,
+      adminProfiles: summarizeProfiles(this.adminProfiles),
+    });
+
+    if (!force && adminFresh) {
+      logMobxResult("ensureAdminGirls served from cache", {
+        adminProfiles: summarizeProfiles(this.adminProfiles),
+      });
       return;
     }
 
@@ -129,6 +230,13 @@ export class AppStore {
         this.adminProfiles = girls;
         this.adminFetchedAt = Date.now();
       });
+      logMobxResult("ensureAdminGirls after request", {
+        adminProfiles: summarizeProfiles(girls),
+      });
+    } catch (error) {
+      if (!this.handleAuthError(error, "ensureAdminGirls")) {
+        throw error;
+      }
     } finally {
       runInAction(() => {
         this.adminLoading = false;
@@ -199,20 +307,22 @@ export class AppStore {
   }
 
   async logout() {
-    await appServices.logout();
-    runInAction(() => {
-      this.user = null;
-      this.availableProfiles = [];
-      this.likedProfiles = [];
-      this.adminProfiles = [];
-      this.matches = [];
-      this.girlsFetchedAt = 0;
-      this.likedFetchedAt = 0;
-      this.adminFetchedAt = 0;
-    });
+    try {
+      await appServices.logout();
+    } finally {
+      runInAction(() => {
+        this.resetSession();
+      });
+    }
   }
 
   async likeProfile(profile: Chan) {
+    const previousMatches = this.matches;
+    const previousAvailableProfiles = this.availableProfiles;
+    const previousLikedProfiles = this.likedProfiles;
+    const previousGirlsFetchedAt = this.girlsFetchedAt;
+    const previousLikedFetchedAt = this.likedFetchedAt;
+
     runInAction(() => {
       this.matches = [...this.matches, profile];
       this.availableProfiles = this.availableProfiles.filter((item) => item.id !== profile.id);
@@ -223,10 +333,30 @@ export class AppStore {
       this.girlsFetchedAt = Date.now();
     });
 
-    await appServices.likeGirl(profile.id);
+    try {
+      await appServices.likeGirl(profile.id);
+    } catch (error) {
+      runInAction(() => {
+        this.matches = previousMatches;
+        this.availableProfiles = previousAvailableProfiles;
+        this.likedProfiles = previousLikedProfiles;
+        this.girlsFetchedAt = previousGirlsFetchedAt;
+        this.likedFetchedAt = previousLikedFetchedAt;
+      });
+
+      if (!this.handleAuthError(error, "likeProfile")) {
+        throw error;
+      }
+    }
   }
 
   async skipProfile(profile: Chan) {
+    const previousMatches = this.matches;
+    const previousAvailableProfiles = this.availableProfiles;
+    const previousLikedProfiles = this.likedProfiles;
+    const previousGirlsFetchedAt = this.girlsFetchedAt;
+    const previousLikedFetchedAt = this.likedFetchedAt;
+
     runInAction(() => {
       this.availableProfiles = this.availableProfiles.filter((item) => item.id !== profile.id);
       this.likedProfiles = this.likedProfiles.filter((item) => item.id !== profile.id);
@@ -235,7 +365,21 @@ export class AppStore {
       this.likedFetchedAt = Date.now();
     });
 
-    await appServices.dislikeGirl(profile.id);
+    try {
+      await appServices.dislikeGirl(profile.id);
+    } catch (error) {
+      runInAction(() => {
+        this.matches = previousMatches;
+        this.availableProfiles = previousAvailableProfiles;
+        this.likedProfiles = previousLikedProfiles;
+        this.girlsFetchedAt = previousGirlsFetchedAt;
+        this.likedFetchedAt = previousLikedFetchedAt;
+      });
+
+      if (!this.handleAuthError(error, "skipProfile")) {
+        throw error;
+      }
+    }
   }
 
   async restartSwipe() {
@@ -244,38 +388,59 @@ export class AppStore {
   }
 
   async createGirl(input: GirlFormInput) {
-    const created = await appServices.createGirl(input);
-    runInAction(() => {
-      this.adminProfiles = [created, ...this.adminProfiles];
-      this.adminFetchedAt = Date.now();
-    });
-    return created;
+    try {
+      const created = await appServices.createGirl(input);
+      runInAction(() => {
+        this.adminProfiles = [created, ...this.adminProfiles];
+        this.adminFetchedAt = Date.now();
+      });
+      return created;
+    } catch (error) {
+      if (!this.handleAuthError(error, "createGirl")) {
+        throw error;
+      }
+      throw error;
+    }
   }
 
   async updateGirl(id: number, input: GirlFormInput) {
-    const updated = await appServices.updateGirl(id, input);
-    runInAction(() => {
-      this.adminProfiles = this.adminProfiles.map((item) => (item.id === id ? updated : item));
-      this.availableProfiles = this.availableProfiles.map((item) => (item.id === id ? updated : item));
-      this.likedProfiles = this.likedProfiles.map((item) => (item.id === id ? updated : item));
-      this.matches = this.matches.map((item) => (item.id === id ? updated : item));
-      this.adminFetchedAt = Date.now();
-      this.girlsFetchedAt = Date.now();
-      this.likedFetchedAt = Date.now();
-    });
-    return updated;
+    try {
+      const updated = await appServices.updateGirl(id, input);
+      runInAction(() => {
+        this.adminProfiles = this.adminProfiles.map((item) => (item.id === id ? updated : item));
+        this.availableProfiles = this.availableProfiles.map((item) => (item.id === id ? updated : item));
+        this.likedProfiles = this.likedProfiles.map((item) => (item.id === id ? updated : item));
+        this.matches = this.matches.map((item) => (item.id === id ? updated : item));
+        this.adminFetchedAt = Date.now();
+        this.girlsFetchedAt = Date.now();
+        this.likedFetchedAt = Date.now();
+      });
+      return updated;
+    } catch (error) {
+      if (!this.handleAuthError(error, "updateGirl")) {
+        throw error;
+      }
+      throw error;
+    }
   }
 
   async deleteGirl(id: number) {
-    await appServices.deleteGirl(id);
-    runInAction(() => {
-      this.adminProfiles = this.adminProfiles.filter((item) => item.id !== id);
-      this.availableProfiles = this.availableProfiles.filter((item) => item.id !== id);
-      this.likedProfiles = this.likedProfiles.filter((item) => item.id !== id);
-      this.matches = this.matches.filter((item) => item.id !== id);
-      this.adminFetchedAt = Date.now();
-      this.girlsFetchedAt = Date.now();
-      this.likedFetchedAt = Date.now();
-    });
+    try {
+      await appServices.deleteGirl(id);
+      runInAction(() => {
+        this.adminProfiles = this.adminProfiles.filter((item) => item.id !== id);
+        this.availableProfiles = this.availableProfiles.filter((item) => item.id !== id);
+        this.likedProfiles = this.likedProfiles.filter((item) => item.id !== id);
+        this.matches = this.matches.filter((item) => item.id !== id);
+        this.adminFetchedAt = Date.now();
+        this.girlsFetchedAt = Date.now();
+        this.likedFetchedAt = Date.now();
+      });
+    } catch (error) {
+      if (!this.handleAuthError(error, "deleteGirl")) {
+        throw error;
+      }
+      throw error;
+    }
   }
 }

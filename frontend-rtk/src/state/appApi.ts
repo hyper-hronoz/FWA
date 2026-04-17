@@ -5,6 +5,65 @@ import type { GirlFormInput, UpdateProfileInput } from "../../../frontend/src/st
 import { ApiError } from "../../../frontend/src/state/shared/apiClient";
 import { appServices } from "../../../frontend/src/state/shared/services";
 
+const APP_API_REDUCER_PATH = "appApi";
+
+type AppApiState = {
+  [APP_API_REDUCER_PATH]?: {
+    queries?: Record<
+      string,
+      {
+        status?: string;
+        data?: unknown;
+        fulfilledTimeStamp?: number;
+      }
+    >;
+  };
+};
+
+const formatValue = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return {
+      type: "array",
+      length: value.length,
+      ids: value
+        .map((item) =>
+          item && typeof item === "object" && "id" in item && typeof item.id === "number" ? item.id : null,
+        )
+        .filter((id): id is number => id !== null)
+        .slice(0, 5),
+    };
+  }
+
+  if (value && typeof value === "object") {
+    return value;
+  }
+
+  return value;
+};
+
+const logRtkCacheSnapshot = (endpointName: string, state: unknown) => {
+  const queries = (state as AppApiState)?.[APP_API_REDUCER_PATH]?.queries ?? {};
+  const matchingEntries = Object.entries(queries)
+    .filter(([key]) => key.startsWith(`${endpointName}(`))
+    .map(([key, entry]) => ({
+      key,
+      status: entry.status,
+      fulfilledTimeStamp: entry.fulfilledTimeStamp,
+      cached: formatValue(entry.data),
+    }));
+
+  console.info(`[RTK cache before] ${endpointName}`, matchingEntries);
+};
+
+const logRtkQueryResult = (endpointName: string, result: { data?: unknown; error?: unknown }) => {
+  if ("error" in result && result.error) {
+    console.info(`[RTK result] ${endpointName} error`, result.error);
+    return;
+  }
+
+  console.info(`[RTK result] ${endpointName} data`, formatValue(result.data));
+};
+
 const toApiError = (error: unknown) => {
   if (error instanceof ApiError) {
     return {
@@ -27,8 +86,15 @@ const tryRequest = async <T>(request: () => Promise<T>) => {
   }
 };
 
+const runLoggedQuery = async <T>(endpointName: string, state: unknown, request: () => Promise<T>) => {
+  logRtkCacheSnapshot(endpointName, state);
+  const result = await tryRequest(request);
+  logRtkQueryResult(endpointName, result);
+  return result;
+};
+
 export const appApi = createApi({
-  reducerPath: "appApi",
+  reducerPath: APP_API_REDUCER_PATH,
   baseQuery: fakeBaseQuery<{ status: number; data: string }>(),
   tagTypes: ["Auth", "Girls", "Liked", "AdminGirls"],
   endpoints: (builder) => ({
@@ -45,7 +111,7 @@ export const appApi = createApi({
       invalidatesTags: ["Auth", "Girls", "Liked", "AdminGirls"],
     }),
     getCurrentUser: builder.query<User, void>({
-      queryFn: () => tryRequest(() => appServices.me()),
+      queryFn: (_arg, api) => runLoggedQuery("getCurrentUser", api.getState(), () => appServices.me()),
       providesTags: ["Auth"],
     }),
     updateProfile: builder.mutation<User, UpdateProfileInput>({
@@ -53,11 +119,11 @@ export const appApi = createApi({
       invalidatesTags: ["Auth"],
     }),
     getUnlikedGirls: builder.query<Chan[], void>({
-      queryFn: () => tryRequest(() => appServices.getUnlikedGirls()),
+      queryFn: (_arg, api) => runLoggedQuery("getUnlikedGirls", api.getState(), () => appServices.getUnlikedGirls()),
       providesTags: ["Girls"],
     }),
     getLikedGirls: builder.query<Chan[], void>({
-      queryFn: () => tryRequest(() => appServices.getLikedGirls()),
+      queryFn: (_arg, api) => runLoggedQuery("getLikedGirls", api.getState(), () => appServices.getLikedGirls()),
       providesTags: ["Liked"],
     }),
     likeGirl: builder.mutation<void, number>({
@@ -120,7 +186,7 @@ export const appApi = createApi({
       invalidatesTags: ["Girls", "Liked"],
     }),
     getAllGirls: builder.query<Chan[], void>({
-      queryFn: () => tryRequest(() => appServices.getAllGirls()),
+      queryFn: (_arg, api) => runLoggedQuery("getAllGirls", api.getState(), () => appServices.getAllGirls()),
       providesTags: ["AdminGirls"],
     }),
     createGirl: builder.mutation<Chan, GirlFormInput>({

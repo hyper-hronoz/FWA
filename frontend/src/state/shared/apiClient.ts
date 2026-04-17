@@ -31,34 +31,48 @@ const parseError = async (response: Response) => {
   return text || `Ошибка запроса: ${response.status}`;
 };
 
+let refreshPromise: Promise<string | null> | null = null;
+
 const refreshAccessToken = async () => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
   const refreshToken = authStorage.getRefreshToken();
 
-  if (!refreshToken) {
-    authStorage.clear();
-    return null;
+    if (!refreshToken) {
+      authStorage.clear();
+      return null;
+    }
+
+    const response = await fetch(`${API_BASE_URL}${ROUTES.auth.refresh}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      authStorage.clear();
+      return null;
+    }
+
+    const payload = (await response.json()) as {
+      accessToken: string;
+      refreshToken: string;
+    };
+
+    authStorage.saveTokens(payload);
+    return payload.accessToken;
+  })();
+
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
   }
-
-  const response = await fetch(`${API_BASE_URL}${ROUTES.auth.refresh}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refreshToken }),
-  });
-
-  if (!response.ok) {
-    authStorage.clear();
-    return null;
-  }
-
-  const payload = (await response.json()) as {
-    accessToken: string;
-    refreshToken: string;
-  };
-
-  authStorage.saveTokens(payload);
-  return payload.accessToken;
 };
 
 export const apiRequest = async <T>(path: string, options: RequestOptions = {}) => {
