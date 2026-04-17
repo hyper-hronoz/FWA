@@ -22,7 +22,9 @@ Create .env file
 
 cp .env.example .env
 
-Edit .env and set password.
+Edit `.env` and set both `DB_PASSWORD` and `DB_ROOT_PASSWORD`.
+
+If you already started MySQL before changing credentials, the existing Docker volume keeps the old users/passwords. In that case recreate the DB volume or manually create/update the `DB_USER` account inside MySQL.
 
 Run project
 
