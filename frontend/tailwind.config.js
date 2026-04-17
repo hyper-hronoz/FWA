@@ -8,16 +8,16 @@ export default {
     extend: {
       colors: {
         anime: {
-          primary: '#FF69B4',    // Хотай розовый
-          secondary: '#9B59B6',  // Фиолетовый
-          accent: '#FF1493',      // Глубокий розовый
-          background: '#1a1a2e',  // Темно-синий фон
-          card: '#16213e',        // Карточки
-          text: '#ffffff',        // Белый текст
-          textSoft: '#b8b8b8',    // Мягкий серый
-          love: '#ff4d6d',        // Красный для лайков
-          skip: '#4a4a4a',         // Серый для пропуска
-          glow: '#ff69b480'        // Полупрозрачный для свечения
+          primary: '#FF69B4',   
+          secondary: '#9B59B6', 
+          accent: '#FF1493',    
+          background: '#1a1a2e',
+          card: '#16213e',      
+          text: '#ffffff',      
+          textSoft: '#b8b8b8',  
+          love: '#ff4d6d',      
+          skip: '#4a4a4a',      
+          glow: '#ff69b480'     
         }
       },
       animation: {
