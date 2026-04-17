@@ -5,11 +5,13 @@ import {
   Search, Video, Loader2, Camera
 } from "lucide-react";
 import { API_BASE_URL, ROUTES } from "../../config/api";
+import { useAuthContext } from "../../context/AuthContext";
 import { resolveMediaUrl } from "../../utils/media";
 import type { Chan } from "@shared/Profile";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
+  const { authFetch } = useAuthContext();
   const [profiles, setProfiles] = useState<Chan[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -38,20 +40,11 @@ export default function AdminPanel() {
     fetchProfiles();
   }, []);
 
-  const getAuthHeaders = (): Record<string, string> => {
-    const token = localStorage.getItem("animeAccessToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
   const fetchProfiles = async () => {
     try {
       setLoadingProfiles(true);
 
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.all}?page=1&limit=100`, {
-        headers: {
-          ...getAuthHeaders(),
-        },
-      });
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.girls.all}?page=1&limit=100`);
 
       if (!response.ok) {
         throw new Error(`Ошибка сервера: ${response.status}`);
@@ -157,11 +150,8 @@ export default function AdminPanel() {
     console.log(formData)
 
     try {
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.create}`, {
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.girls.create}`, {
         method: "POST",
-        headers: {
-          ...getAuthHeaders(),
-        },
         body: formData,
       });
 
@@ -206,11 +196,8 @@ export default function AdminPanel() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.update(editingId)}`, {
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.girls.update(editingId)}`, {
         method: "PUT",
-        headers: {
-          ...getAuthHeaders(),
-        },
         body: formData,
       });
 
@@ -251,11 +238,8 @@ export default function AdminPanel() {
     if (!window.confirm("Удалить эту тянку?")) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}${ROUTES.girls.delete(id)}`, {
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.girls.delete(id)}`, {
         method: "DELETE",
-        headers: {
-          ...getAuthHeaders(),
-        },
       });
 
       if (!response.ok) {

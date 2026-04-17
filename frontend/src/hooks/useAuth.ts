@@ -241,6 +241,7 @@ export function useAuth() {
     user,
     loading,
     error,
+    authFetch,
     login,
     register,
     logout,
