@@ -5,27 +5,16 @@ import { useAuthContext } from "../context/AuthContext";
 import type { Chan } from "@shared/Profile";
 
 export function useChan() {
-  const { user } = useAuthContext();
+  const { user, authFetch } = useAuthContext();
 
   const [matches, setMatches] = useState<Chan[]>([]);
   const [availableProfiles, setAvailableProfiles] = useState<Chan[]>([]);
   const [likedProfiles, setLikedProfiles] = useState<Chan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getAuthHeaders = (includeJsonContentType = false) => {
-    const token = localStorage.getItem("animeAccessToken");
-    return {
-      Authorization: `Bearer ${token}`,
-      ...(includeJsonContentType ? { "Content-Type": "application/json" } : {}),
-    };
-  };
-
   const fetchChans = async () => {
     try {
-      const res = await fetch(
-        `${API_BASE_URL}${ROUTES.girls.unliked}?page=1&limit=10`,
-        { headers: getAuthHeaders() }
-      );
+      const res = await authFetch(`${API_BASE_URL}${ROUTES.girls.unliked}?page=1&limit=10`);
 
       if (!res.ok) throw new Error("Ошибка загрузки всех тян");
 
@@ -42,9 +31,7 @@ export function useChan() {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_BASE_URL}${ROUTES.girls.liked}`, {
-        headers: getAuthHeaders(),
-      });
+      const res = await authFetch(`${API_BASE_URL}${ROUTES.girls.liked}`);
 
       if (!res.ok) throw new Error("Ошибка загрузки лайкнутых тян");
 
@@ -68,10 +55,13 @@ export function useChan() {
 
   const sendLikeToServer = async (profile: Chan) => {
     try {
-      await fetch(`${API_BASE_URL}${ROUTES.girls.like(profile.id)}`, {
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.girls.like(profile.id)}`, {
         method: "POST",
-        headers: getAuthHeaders(),
       });
+
+      if (!response.ok) {
+        throw new Error("Ошибка лайка");
+      }
     } catch (err) {
       console.error("Ошибка лайка:", err);
     }
@@ -79,10 +69,13 @@ export function useChan() {
 
   const sendDislikeToServer = async (profile: Chan) => {
     try {
-      await fetch(`${API_BASE_URL}${ROUTES.girls.unlike(profile.id)}`, {
+      const response = await authFetch(`${API_BASE_URL}${ROUTES.girls.unlike(profile.id)}`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
       });
+
+      if (!response.ok) {
+        throw new Error("Ошибка дизлайка");
+      }
     } catch (err) {
       console.error("Ошибка дизлайка:", err);
     }

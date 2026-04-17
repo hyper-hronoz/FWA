@@ -1,0 +1,99 @@
+services:
+  db:
+    image: mysql:9.2
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/docker/mysql/init:/docker-entrypoint-initdb.d
+
+  service-auth:
+    image: node:20
+    working_dir: /usr/src/app
+    command: >
+      sh -c "npm install && npm run dev"
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./backend/services/service-auth:/usr/src/app
+      - service_auth_node_modules:/usr/src/app/node_modules
+
+  service-girls:
+    image: node:20
+    working_dir: /usr/src/app
+    command: >
+      sh -c "npm install && npm run dev"
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./backend/services/service-girls:/usr/src/app
+      - ./backend/static:/app/static
+      - service_girls_node_modules:/usr/src/app/node_modules
+
+  service-users:
+    image: node:20
+    working_dir: /usr/src/app
+    command: >
+      sh -c "npm install && npm run dev"
+    ports:
+      - "3003:3003"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./backend/services/service-users:/usr/src/app
+      - service_users_node_modules:/usr/src/app/node_modules
+
+  service-gateway:
+    image: node:20
+    working_dir: /usr/src/app
+    command: >
+      sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - service-auth
+      - service-users
+      - service-girls
+    volumes:
+      - ./backend/service-gateway:/usr/src/app
+      - ./backend/static:/app/static
+      - service_gateway_node_modules:/usr/src/app/node_modules
+
+  frontend:
+    image: node:20
+    working_dir: /app
+    command: >
+      sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - service-gateway
+    volumes:
+      - ./frontend:/app
+      - ./shared:/shared
+      - frontend_node_modules:/app/node_modules
+
+volumes:
+  mysql_data:
+  frontend_node_modules:
+  service_auth_node_modules:
+  service_girls_node_modules:
+  service_users_node_modules:
+  service_gateway_node_modules:

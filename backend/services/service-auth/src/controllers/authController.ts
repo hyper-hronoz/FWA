@@ -8,7 +8,7 @@ import adminsConfig from "../config/admins.json";
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "SECRET_KEY";
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "REFRESH_SECRET_KEY";
-const ACCESS_TOKEN_TTL = "15s";
+const ACCESS_TOKEN_TTL = "5s";
 const REFRESH_TOKEN_TTL = "7d";
 const ADMIN_EMAILS = new Set(
   (adminsConfig.emails || []).map((email) => email.toLowerCase())

@@ -7,6 +7,7 @@ import type { LoginData, RegisterData } from "@shared/Auth";
 
 export interface AuthContextType {
   user: User | null;
+  authFetch: (url: string, options?: RequestInit) => Promise<Response>;
   login: (data: LoginData) => Promise<{ success: boolean; user?: User; error?: string }>;
   register: (data: RegisterData) => Promise<{ success: boolean; user?: User; error?: string }>;
   updateProfile: (data: Partial<User> & { password?: string }) => Promise<{ success: boolean; user?: User; error?: string }>;
@@ -17,10 +18,10 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { user, login, register, logout, loading, updateProfile } = useAuthHook();
+  const { user, authFetch, login, register, logout, loading, updateProfile } = useAuthHook();
 
   return (
-    <AuthContext.Provider value={{ user, login, register, updateProfile, logout, loading }}>
+    <AuthContext.Provider value={{ user, authFetch, login, register, updateProfile, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
