@@ -19,9 +19,9 @@ app.use(
 
 
 const SERVICES = {
-  auth: "http://service-auth:3001",
-  users: "http://service-users:3003",
-  girls: "http://service-girls:3002",
+  auth: process.env.AUTH_SERVICE_URL || "http://service-auth:3001",
+  users: process.env.USERS_SERVICE_URL || "http://service-users:3003",
+  girls: process.env.GIRLS_SERVICE_URL || "http://service-girls:3002",
 };
 
 
@@ -70,9 +70,9 @@ app.get("/", (req, res) => {
 
 
 const SERVICE_DOCS = [
-  "http://service-auth:3001/docs-json",
-  "http://service-users:3003/docs-json",
-  "http://service-girls:3002/docs-json",
+  `${SERVICES.auth}/docs-json`,
+  `${SERVICES.users}/docs-json`,
+  `${SERVICES.girls}/docs-json`,
 ];
 
 app.get("/docs-json", async (req, res) => {
@@ -111,8 +111,10 @@ app.use(
   })
 );
 
-app.use('/videos', express.static('/app/static/videos'));
-app.use('/avatars', express.static('/app/static/avatars'));
+const staticRoot = process.env.STATIC_ROOT || "/app/static";
+
+app.use("/videos", express.static(`${staticRoot}/videos`));
+app.use("/avatars", express.static(`${staticRoot}/avatars`));
 
 app.listen(3000, () => {
   console.log("Gateway running on port 3000");

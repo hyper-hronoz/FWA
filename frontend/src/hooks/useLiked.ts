@@ -6,23 +6,14 @@ import { useAuthContext } from "../context/AuthContext";
 import type { Chan } from "@shared/Profile";
 
 export function useLiked() {
-  const { user } = useAuthContext();
+  const { user, authFetch } = useAuthContext();
   const [likedProfiles, setLikedProfiles] = useState<Chan[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("animeAccessToken");
-    return {
-      Authorization: `Bearer ${token}`,
-    };
-  };
 
   const fetchLikedProfiles = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}${ROUTES.girls.liked}`, {
-        headers: getAuthHeaders(),
-      });
+      const res = await authFetch(`${API_BASE_URL}${ROUTES.girls.liked}`);
 
       if (!res.ok) throw new Error("Ошибка загрузки лайкнутых тян");
 
