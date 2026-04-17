@@ -40,3 +40,35 @@ npm run dev
 
 - `cd frontend-rtk && npm run build`
 - `cd frontend-mobx && npm run build`
+
+Локальный dev-режим для текущих `frontend/` и `backend/`:
+
+```bash
+bash ./dev.sh
+```
+
+Скрипт:
+
+- поднимает отдельный dev stack из `docker-compose.dev.yaml`;
+- монтирует исходники в контейнеры;
+- запускает backend через `npm run dev`;
+- запускает frontend через Vite с hot reload без пересборки образов.
+
+Быстрый rebuild для docker-окружения:
+
+```bash
+./rebuild-fast.sh
+```
+
+Скрипт:
+
+- смотрит локальные изменения через `git status`;
+- пересобирает только затронутые сервисы;
+- не делает `docker compose down -v`;
+- сохраняет volume базы данных и использует cache Docker-сборки.
+
+Полная пересборка без удаления volume:
+
+```bash
+./rebuild-fast.sh --full
+```
