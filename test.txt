@@ -9,3 +9,37 @@ refreshToken	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ2bGFkX
 accessToken	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ2bGFkX21vcnlha292X3Byb2dAbWFpbC5ydSIsImlhdCI6MTc3NjQ0NzQ0OSwiZXhwIjoxNzc2NDQ3NDU0fQ.wEfV7KIhQkmV8JLKnAwdOo5uvXry50UBSlEvP5IczCE"
 
 refreshToken	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ2bGFkX21vcnlha292X3Byb2dAbWFpbC5ydSIsImlhdCI6MTc3NjQ0NzQ0OSwiZXhwIjoxNzc3MDUyMjQ5fQ.Tbuc_C0XVK3XY-47ovOC93eLmnidIiLhvTwrvH2iaxc"
+
+  Проверка
+
+  - Redux RTK реализован: есть RTK Store и RTK Query в frontend-rtk/
+    src/state/store.ts:1 и frontend-rtk/src/state/appApi.ts:1.
+  - MobX реализован: есть централизованный store в frontend-mobx/src/
+    state/store.ts:1.
+  - Данные от backend заведены в state manager:
+      - RTK: текущий пользователь, списки анкет, лайкнутые анкеты,
+        админский список идут через appApi и store, см. frontend-rtk/
+        src/state/appApi.ts:35 и frontend-rtk/src/state/hooks.tsx:15.
+      - MobX: те же данные хранятся в AppStore (user,
+        availableProfiles, likedProfiles, adminProfiles), см. frontend-
+        mobx/src/state/store.ts:10.
+      - Прямых вызовов backend из UI-компонентов для RTK/MobX
+        приложений я не увидел; обращения идут через store/API-слой.
+  - Кэширование запросов настроено:
+      - RTK: кэш RTK Query есть по определению, используются
+        builder.query, providesTags, invalidatesTags, а также
+        optimistic updates для лайков/дизлайков, см. frontend-rtk/src/
+        state/appApi.ts:47, frontend-rtk/src/state/appApi.ts:63,
+        frontend-rtk/src/state/appApi.ts:98.
+      - MobX: есть ручной TTL-кэш CACHE_TTL = 60_000 и проверки
+        isFresh(...) для swipe/liked/admin данных, см. frontend-mobx/
+        src/state/store.ts:6, frontend-mobx/src/state/store.ts:58,
+        frontend-mobx/src/state/store.ts:89, frontend-mobx/src/state/
+        store.ts:110.
+  - Один и тот же результат запроса используется в нескольких местах:
+      - likedProfiles используется и на странице лайков frontend/src/
+        components/pages/Liked.tsx:8, и в настройках профиля frontend/
+        src/components/pages/ProfileSettings.tsx:11.
+      - В самой странице настроек это даже явно отражено текстом, см.
+        frontend/src/components/pages/ProfileSettings.tsx:161.
+

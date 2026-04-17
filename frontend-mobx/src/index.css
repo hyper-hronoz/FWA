@@ -1,0 +1,3 @@
+@source ".";
+@source "../../frontend/src";
+@import "../../frontend/src/index.css";

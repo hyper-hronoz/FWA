@@ -96,6 +96,8 @@ main() {
   local rebuild_all=0
   local ensure_stack=0
   local restart_frontend=0
+  local restart_frontend_rtk=0
+  local restart_frontend_mobx=0
   local restart_gateway=0
   local restart_girls=0
   local file
@@ -104,9 +106,30 @@ main() {
 
   for file in "${changed_files[@]}"; do
     case "$file" in
-      frontend/*|shared/*|frontend/Dockerfile|nginx.conf)
+      frontend/*|frontend/Dockerfile|nginx.conf)
         if append_unique "frontend" "${rebuild_services[@]}"; then
           rebuild_services+=("frontend")
+        fi
+        ;;
+      frontend-rtk/*|frontend-rtk/Dockerfile)
+        if append_unique "frontend-rtk" "${rebuild_services[@]}"; then
+          rebuild_services+=("frontend-rtk")
+        fi
+        ;;
+      frontend-mobx/*|frontend-mobx/Dockerfile)
+        if append_unique "frontend-mobx" "${rebuild_services[@]}"; then
+          rebuild_services+=("frontend-mobx")
+        fi
+        ;;
+      shared/*)
+        if append_unique "frontend" "${rebuild_services[@]}"; then
+          rebuild_services+=("frontend")
+        fi
+        if append_unique "frontend-rtk" "${rebuild_services[@]}"; then
+          rebuild_services+=("frontend-rtk")
+        fi
+        if append_unique "frontend-mobx" "${rebuild_services[@]}"; then
+          rebuild_services+=("frontend-mobx")
         fi
         ;;
       backend/service-gateway/*)
@@ -140,6 +163,8 @@ main() {
         ;;
       backend/static/videos/*|backend/static/avatars/*)
         restart_frontend=1
+        restart_frontend_rtk=1
+        restart_frontend_mobx=1
         restart_gateway=1
         restart_girls=1
         ;;
@@ -156,7 +181,7 @@ main() {
       backend/package.json|backend/package-lock.json)
         rebuild_all=1
         ;;
-      README.md|TODO.txt|LICENSE|.gitignore|backend/.gitignore|frontend/.gitignore)
+      README.md|TODO.txt|LICENSE|.gitignore|backend/.gitignore|frontend/.gitignore|frontend-rtk/.gitignore|frontend-mobx/.gitignore)
         ;;
       *)
         rebuild_all=1
@@ -174,7 +199,7 @@ main() {
     "${COMPOSE_CMD[@]}" up -d
   fi
 
-  if [[ "${#rebuild_services[@]}" -eq 0 && "$restart_frontend" -eq 0 && "$restart_gateway" -eq 0 && "$restart_girls" -eq 0 ]]; then
+  if [[ "${#rebuild_services[@]}" -eq 0 && "$restart_frontend" -eq 0 && "$restart_frontend_rtk" -eq 0 && "$restart_frontend_mobx" -eq 0 && "$restart_gateway" -eq 0 && "$restart_girls" -eq 0 ]]; then
     log "Only non-runtime files changed. Ensuring containers are running."
     "${COMPOSE_CMD[@]}" up -d
     exit 0
@@ -194,6 +219,14 @@ main() {
 
   if [[ "$restart_frontend" -eq 1 ]]; then
     restart_service "frontend"
+  fi
+
+  if [[ "$restart_frontend_rtk" -eq 1 ]]; then
+    restart_service "frontend-rtk"
+  fi
+
+  if [[ "$restart_frontend_mobx" -eq 1 ]]; then
+    restart_service "frontend-mobx"
   fi
 
   log "Done"
