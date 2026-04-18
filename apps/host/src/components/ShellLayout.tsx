@@ -10,9 +10,9 @@ export function ShellLayout() {
   }
 
   return (
-    <>
+    <div className="relative z-10">
       <Navbar user={user} totalProfiles={0} onLogout={logout} />
       <Outlet />
-    </>
+    </div>
   );
 }

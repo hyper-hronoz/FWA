@@ -4,6 +4,23 @@ import { useAuthContext } from "../context/AuthContext";
 
 import type { Chan } from "@shared/Profile";
 
+const normalizeLikedPayload = (payload: unknown): Chan[] => {
+  if (Array.isArray(payload)) {
+    return payload as Chan[];
+  }
+
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "data" in payload &&
+    Array.isArray((payload as { data?: unknown }).data)
+  ) {
+    return (payload as { data: Chan[] }).data;
+  }
+
+  return [];
+};
+
 export function useChan() {
   const { user, authFetch } = useAuthContext();
 
@@ -36,7 +53,7 @@ export function useChan() {
       if (!res.ok) throw new Error("Ошибка загрузки лайкнутых тян");
 
       const data = await res.json();
-      setLikedProfiles(data.data);
+      setLikedProfiles(normalizeLikedPayload(data));
     } catch (err) {
       console.error("Ошибка получения лайкнутых профилей:", err);
     } finally {

@@ -1,4 +1,3 @@
-import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import {
@@ -13,9 +12,19 @@ import {
 } from "@fwa/shared-ui";
 import { MicrofrontendBoundary } from "./components/MicrofrontendBoundary";
 import { ShellLayout } from "./components/ShellLayout";
+import { importWithRetry } from "./utils/lazyRemote";
 
-const MainRemoteRoutes = lazy(() => import("mainRemote/AppRoutes"));
-const AdminRemoteRoutes = lazy(() => import("adminRemote/AppRoutes"));
+const loadMainRemoteRoutes = () =>
+  importWithRetry(() => import("mainRemote/AppRoutes"), {
+    attempts: 6,
+    delayMs: 1200
+  });
+
+const loadAdminRemoteRoutes = () =>
+  importWithRetry(() => import("adminRemote/AppRoutes"), {
+    attempts: 6,
+    delayMs: 1200
+  });
 
 const hostPaths = {
   ...defaultAppPaths,
@@ -46,9 +55,12 @@ export default function App() {
                     <Route
                       path="/app/*"
                       element={
-                        <MicrofrontendBoundary title="Основной микрофронт временно недоступен">
-                          <MainRemoteRoutes />
-                        </MicrofrontendBoundary>
+                        <MicrofrontendBoundary
+                          loader={loadMainRemoteRoutes}
+                          title="Основной микрофронт временно недоступен"
+                          description="Пользовательский поток не загрузился с первого раза. Host попробует переподключить remote, а ты можешь вручную повторить подключение без полного рестарта приложения."
+                          loadingLabel="Подключаем пользовательский поток..."
+                        />
                       }
                     />
                   </Route>
@@ -59,9 +71,12 @@ export default function App() {
                     <Route
                       path="/admin/*"
                       element={
-                        <MicrofrontendBoundary title="Админ-микрофронт временно недоступен">
-                          <AdminRemoteRoutes />
-                        </MicrofrontendBoundary>
+                        <MicrofrontendBoundary
+                          loader={loadAdminRemoteRoutes}
+                          title="Админ-микрофронт временно недоступен"
+                          description="Админский remote сейчас не ответил. Shell остается живым и может заново подключить его без разрыва пользовательской сессии."
+                          loadingLabel="Подключаем админ-поток..."
+                        />
                       }
                     />
                   </Route>

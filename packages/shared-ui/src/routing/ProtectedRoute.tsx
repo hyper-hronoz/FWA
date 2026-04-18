@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthContext } from '../context/AuthContext';
 import { useAppPaths } from "./AppPathsContext";
+import AdminAccessDenied from "../components/admin/AdminAccessDenied";
 
 export const ProtectedRoute = () => {
   const { user } = useAuthContext();
@@ -33,7 +34,7 @@ export const AdminRoute = () => {
   }
 
   if (!user.is_admin) {
-    return <Navigate to={paths.mainSwipe} replace />;
+    return <AdminAccessDenied />;
   }
 
   return <Outlet />;

@@ -89,7 +89,7 @@ export default function ProfileSettings() {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-anime-text outline-none transition focus:border-anime-primary/60"
+                className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-anime-primary/60 focus:ring-4 focus:ring-anime-primary/10"
                 required
               />
             </label>
@@ -104,7 +104,7 @@ export default function ProfileSettings() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-anime-text outline-none transition focus:border-anime-primary/60"
+                className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-anime-primary/60 focus:ring-4 focus:ring-anime-primary/10"
                 required
               />
             </label>
@@ -121,7 +121,7 @@ export default function ProfileSettings() {
                 name="age"
                 value={formData.age}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-anime-text outline-none transition focus:border-anime-primary/60"
+                className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-anime-primary/60 focus:ring-4 focus:ring-anime-primary/10"
                 required
               />
             </label>
@@ -137,7 +137,7 @@ export default function ProfileSettings() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Оставь пустым, если менять не нужно"
-                className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-anime-text outline-none transition focus:border-anime-primary/60"
+                className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-anime-primary/60 focus:ring-4 focus:ring-anime-primary/10"
               />
             </label>
 
