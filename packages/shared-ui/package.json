@@ -1,4 +1,10 @@
 {
   "name": "@fwa/shared-ui",
-  "private": true
+  "private": true,
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated.css": "./src/generated.css"
+  }
 }

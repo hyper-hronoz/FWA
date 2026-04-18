@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { AdminPanelPage } from "@shared-ui/index";
+import { AdminPanelPage } from "@fwa/shared-ui";
 
 export default function AppRoutes() {
   return (

@@ -32,7 +32,13 @@ export function useAuth() {
   }
 
   const getErrorMessage = (error: unknown): string => {
-    if (error instanceof Error) return error.message
+    if (error instanceof Error) {
+      if (error.message === 'Server error') {
+        return 'Сервис авторизации временно недоступен. Попробуй позже.'
+      }
+
+      return error.message
+    }
     if (typeof error === 'string') return error
     return 'An unknown error occurred'
   }
@@ -41,12 +47,43 @@ export function useAuth() {
     const contentType = response.headers.get('content-type') || ''
 
     if (contentType.includes('application/json')) {
-      const err = await response.json() as { message?: string }
-      return err.message || 'Ошибка запроса'
+      try {
+        const err = await response.json() as { message?: string; error?: string }
+        return err.message || err.error || 'Ошибка запроса'
+      } catch {
+        return `Ошибка запроса: ${response.status}`
+      }
     }
 
     const text = await response.text()
-    return text || `Ошибка запроса: ${response.status}`
+
+    const normalizedText = text.trim()
+
+    if (!normalizedText) {
+      return `Ошибка запроса: ${response.status}`
+    }
+
+    if (normalizedText.startsWith("<!DOCTYPE html") || normalizedText.startsWith("<html")) {
+      return response.status >= 500
+        ? "Сервис авторизации временно недоступен. Попробуй позже."
+        : `Ошибка запроса: ${response.status}`
+    }
+
+    return normalizedText
+  }
+
+  const parseSuccessResponse = async <T>(response: Response, fallbackMessage: string): Promise<T> => {
+    const contentType = response.headers.get('content-type') || ''
+
+    if (!contentType.includes('application/json')) {
+      throw new Error(fallbackMessage)
+    }
+
+    try {
+      return await response.json() as T
+    } catch {
+      throw new Error(fallbackMessage)
+    }
   }
 
   const refreshAccessToken = async () => {
@@ -137,11 +174,13 @@ export function useAuth() {
       })
 
       if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.message || 'Ошибка входа')
+        throw new Error(await parseErrorResponse(response))
       }
 
-      const result: AuthResponse = await response.json()
+      const result = await parseSuccessResponse<AuthResponse>(
+        response,
+        'Сервис авторизации вернул некорректный ответ'
+      )
       saveAuth(result)
 
       if ('Notification' in window && Notification.permission === 'default') {
@@ -170,11 +209,13 @@ export function useAuth() {
       })
 
       if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.message || 'Ошибка регистрации')
+        throw new Error(await parseErrorResponse(response))
       }
 
-      const result: AuthResponse = await response.json()
+      const result = await parseSuccessResponse<AuthResponse>(
+        response,
+        'Сервис регистрации вернул некорректный ответ'
+      )
       saveAuth(result)
 
       return { success: true, user: result.user }

@@ -13,8 +13,8 @@ export default function Auth({ mode }: AuthProps) {
   const isLogin = mode === 'login'
   const authVideoSrc =
     typeof window === 'undefined'
-      ? 'static/videos/index.mp4'
-      : new URL('/static/videos/index.mp4', window.location.origin).toString()
+      ? 'videos/index.mp4'
+      : new URL('/videos/index.mp4', window.location.origin).toString()
 
   const [formData, setFormData] = useState({
     username: '',

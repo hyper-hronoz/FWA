@@ -6,7 +6,7 @@ import {
   AuthProvider,
   BackgroundEffects,
   defaultAppPaths
-} from "@shared-ui/index";
+} from "@fwa/shared-ui";
 
 import AppRoutes from "./exposes/AppRoutes";
 

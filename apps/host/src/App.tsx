@@ -10,8 +10,7 @@ import {
   GuestRoute,
   ProtectedRoute,
   defaultAppPaths
-} from "@shared-ui/index";
-
+} from "@fwa/shared-ui";
 import { MicrofrontendBoundary } from "./components/MicrofrontendBoundary";
 import { ShellLayout } from "./components/ShellLayout";
 

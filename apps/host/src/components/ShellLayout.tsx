@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 
-import { useAuthContext } from "@shared-ui/index";
-import Navbar from "@shared-ui/components/layout/Navbar";
+import { Navbar, useAuthContext } from "@fwa/shared-ui";
 
 export function ShellLayout() {
   const { user, logout } = useAuthContext();

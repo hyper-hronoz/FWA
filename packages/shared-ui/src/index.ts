@@ -8,6 +8,7 @@ export { default as FinishScreen } from "./components/pages/FinishScreen";
 export { default as ProfileSettingsPage } from "./components/pages/ProfileSettings";
 export { default as AdminPanelPage } from "./components/admin/AdminPanel";
 export { default as BackgroundEffects } from "./components/layout/BackgroundEffects";
+export { default as Navbar } from "./components/layout/Navbar";
 export { default as AnimeLoading } from "./components/ui/AnimeLoading";
 export { useChan } from "./hooks/useChan";
 export { useLiked } from "./hooks/useLiked";

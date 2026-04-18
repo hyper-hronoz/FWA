@@ -11,7 +11,8 @@ const rootDir = path.resolve(__dirname, "../..");
 const sharedDeps = {
   react: { singleton: true, requiredVersion: false },
   "react-dom": { singleton: true, requiredVersion: false },
-  "react-router-dom": { singleton: true, requiredVersion: false }
+  "react-router-dom": { singleton: true, requiredVersion: false },
+  "@fwa/shared-ui": { singleton: true, requiredVersion: false }
 };
 
 const createWebpackConfig = ({
@@ -23,6 +24,18 @@ const createWebpackConfig = ({
   define = {}
 }) => {
   const isProd = mode === "production";
+  const staticDirectories = [
+    {
+      directory: path.resolve(appDir, "dist")
+    }
+  ];
+
+  if (publicDir) {
+    staticDirectories.push({
+      directory: path.resolve(appDir, publicDir),
+      publicPath: "/"
+    });
+  }
 
   return {
     context: appDir,
@@ -102,9 +115,7 @@ const createWebpackConfig = ({
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
-      static: {
-        directory: path.resolve(appDir, "dist")
-      }
+      static: staticDirectories
     },
     performance: false,
     optimization: {

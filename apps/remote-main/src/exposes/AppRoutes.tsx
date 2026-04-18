@@ -6,7 +6,7 @@ import {
   ProfileSettingsPage,
   SwipeScreen,
   useChan
-} from "@shared-ui/index";
+} from "@fwa/shared-ui";
 
 export default function AppRoutes() {
   const { availableProfiles, matches, handleLike, handleSkip, handleRestart, refetch } = useChan();

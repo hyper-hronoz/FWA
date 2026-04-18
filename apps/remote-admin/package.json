@@ -1,6 +1,9 @@
 {
   "name": "@fwa/remote-admin",
   "private": true,
+  "dependencies": {
+    "@fwa/shared-ui": "1.0.0"
+  },
   "scripts": {
     "start": "npm run styles --prefix ../.. && webpack serve --config webpack.config.js --mode development",
     "build": "npm run styles --prefix ../.. && webpack --config webpack.config.js --mode production"

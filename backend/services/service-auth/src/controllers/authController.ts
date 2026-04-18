@@ -90,50 +90,55 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const [rows]: any = await db.query(
-    "SELECT * FROM users WHERE email=?",
-    [email]
-  );
+  try {
+    const { email, password } = req.body;
+    const [rows]: any = await db.query(
+      "SELECT * FROM users WHERE email=?",
+      [email]
+    );
 
-  const user = rows[0];
+    const user = rows[0];
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(401).json({ message: "Неверный email или пароль" });
+    }
+
+    const valid = await bcrypt.compare(password, user.password_hash);
+
+    if (!valid) {
+      return res.status(401).json({ message: "Неверный email или пароль" });
+    }
+
+    const tokenPayload = { id: user.id, email: user.email };
+    const accessToken = signAccessToken(tokenPayload);
+    const refreshToken = signRefreshToken(tokenPayload);
+    const isAdmin = await syncAdminStatus(user);
+
+    await db.query(
+      "INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))",
+      [user.id, refreshToken]
+    );
+
+    const safeUser: User = {
+      id: String(user.id),
+      email: user.email,
+      username: user.username,
+      age: user.age,
+      avatar: user.avatar ?? null,
+      createdAt: user.createdAt ?? new Date().toISOString(),
+      is_admin: isAdmin,
+    };
+    const response: AuthResponse = {
+      user: safeUser,
+      accessToken,
+      refreshToken,
+    };
+
+    return res.json(response);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Сервис авторизации временно недоступен" });
   }
-
-  const valid = await bcrypt.compare(password, user.password_hash);
-
-  if (!valid) {
-    return res.status(401).json({ message: "Invalid password" });
-  }
-
-  const tokenPayload = { id: user.id, email: user.email };
-  const accessToken = signAccessToken(tokenPayload);
-  const refreshToken = signRefreshToken(tokenPayload);
-  const isAdmin = await syncAdminStatus(user);
-
-  await db.query(
-    "INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))",
-    [user.id, refreshToken]
-  );
-
-  const safeUser: User = {
-    id: String(user.id),
-    email: user.email,
-    username: user.username,
-    age: user.age,
-    avatar: user.avatar ?? null,
-    createdAt: user.createdAt ?? new Date().toISOString(),
-    is_admin: isAdmin,
-  };
-  const response: AuthResponse = {
-    user: safeUser,
-    accessToken,
-    refreshToken,
-  };
-
-  return res.json(response);
 };
 
 export const me = async (req: Request, res: Response) => {

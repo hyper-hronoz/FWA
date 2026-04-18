@@ -15,7 +15,7 @@ export default function Navbar({
   const paths = useAppPaths()
 
   return (
-    <nav className="bg-anime-card bg-opacity-80 backdrop-blur-lg border-b border-anime-primary border-opacity-30 sticky top-0 z-40">
+    <nav className="sticky top-0 z-40 border-b border-anime-primary/30 bg-anime-background/55 backdrop-blur-lg">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
 
         <h1 
