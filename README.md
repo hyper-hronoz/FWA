@@ -1,74 +1,50 @@
-# FWA
+# FWA Microfrontends
 
-В репозитории теперь есть три клиентских варианта:
+Репозиторий переведен на монорепозиторий с `npm workspaces` и `webpack module federation`.
 
-- `frontend/` — исходная версия из предыдущей лабораторной.
-- `frontend-rtk/` — версия с `Redux Toolkit` и `RTK Query`.
-- `frontend-mobx/` — версия с `MobX`.
+Структура:
 
-Обе новые версии сохраняют существующий UI и переводят backend-данные в менеджер состояний:
+- `apps/host` — shell-приложение: авторизация, header, footer, навигация, fallback для недоступных remote.
+- `apps/remote-main` — основной пользовательский микрофронт: свайпы, лайкнутые анкеты, настройки, финальный экран.
+- `apps/remote-admin` — админ-микрофронт.
+- `packages/shared-ui` — общий UI, auth context, hooks, страницы и стили.
+- `packages/webpack-config` — общая webpack-конфигурация.
+- `shared` — общие типы.
 
-- текущий пользователь и авторизация;
-- анкеты для свайпов;
-- лайкнутые анкеты;
-- данные админ-панели.
-
-Кэширование:
-
-- `frontend-rtk` использует встроенный кэш `RTK Query`;
-- `frontend-mobx` использует store-кэш с TTL и инвалидацией после мутаций.
-
-Повторное использование одних и тех же данных:
-
-- запрос лайкнутых анкет используется и на странице `Liked`, и в `ProfileSettings` для вывода дополнительной статистики о пользователе.
-
-Запуск:
+Запуск локальной сборки:
 
 ```bash
-cd frontend-rtk
 npm install
-npm run dev
+npm run build
 ```
 
-```bash
-cd frontend-mobx
-npm install
-npm run dev
-```
-
-Сборка проверена:
-
-- `cd frontend-rtk && npm run build`
-- `cd frontend-mobx && npm run build`
-
-Локальный dev-режим для текущих `frontend/` и `backend/`:
+Dev stack через Docker:
 
 ```bash
 bash ./dev.sh
 ```
 
-Скрипт:
+Адреса:
 
-- поднимает отдельный dev stack из `docker-compose.dev.yaml`;
-- монтирует исходники в контейнеры;
-- запускает backend через `npm run dev`;
-- запускает frontend через Vite с hot reload без пересборки образов.
+- host: `http://localhost:3003`
+- remote-main: `http://localhost:3004`
+- remote-admin: `http://localhost:3005`
+- gateway: `http://localhost:3000`
 
-Быстрый rebuild для docker-окружения:
-
-```bash
-./rebuild-fast.sh
-```
-
-Скрипт:
-
-- смотрит локальные изменения через `git status`;
-- пересобирает только затронутые сервисы;
-- не делает `docker compose down -v`;
-- сохраняет volume базы данных и использует cache Docker-сборки.
-
-Полная пересборка без удаления volume:
+Production stack через Docker Compose:
 
 ```bash
-./rebuild-fast.sh --full
+docker compose up --build
 ```
+
+Адреса:
+
+- host: `http://localhost`
+- remote-main: `http://localhost:3004`
+- remote-admin: `http://localhost:3005`
+
+Отказоустойчивость:
+
+- каждый frontend работает в отдельном контейнере;
+- host загружает remotes через Module Federation;
+- если remote остановлен или недоступен, host не падает и показывает сообщение: что-то сломалось, скоро все починим.

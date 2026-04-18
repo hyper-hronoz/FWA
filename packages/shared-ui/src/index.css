@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Quicksand:wght@300;400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card-flip {
+  will-change: transform, opacity, filter;
+  transform-style: preserve-3d;
+  perspective: 1600px;
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+.card-flip-enter {
+  animation: cardFlipEnter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-flip-like {
+  animation: cardFlipLike 420ms cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+.card-flip-skip {
+  animation: cardFlipSkip 420ms cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+@keyframes cardFlipEnter {
+  from {
+    opacity: 0;
+    transform: perspective(1600px) rotateY(-10deg) translateX(18px) scale(0.985);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes cardFlipLike {
+  0% {
+    opacity: 1;
+    transform: perspective(1600px) rotateY(0deg) rotateZ(0deg) scale(1);
+    filter: blur(0);
+  }
+  45% {
+    opacity: 1;
+    transform: perspective(1600px) translateX(18px) rotateY(46deg) rotateZ(2deg) scale(0.99);
+    filter: blur(0);
+  }
+  82% {
+    opacity: 0.9;
+    transform: perspective(1600px) translateX(28px) rotateY(76deg) rotateZ(4deg) scale(0.975);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1600px) translateX(36px) rotateY(94deg) rotateZ(5deg) scale(0.965);
+    filter: blur(3px);
+  }
+}
+
+@keyframes cardFlipSkip {
+  0% {
+    opacity: 1;
+    transform: perspective(1600px) rotateY(0deg) rotateZ(0deg) scale(1);
+    filter: blur(0);
+  }
+  45% {
+    opacity: 1;
+    transform: perspective(1600px) translateX(-18px) rotateY(-46deg) rotateZ(-2deg) scale(0.99);
+    filter: blur(0);
+  }
+  82% {
+    opacity: 0.9;
+    transform: perspective(1600px) translateX(-28px) rotateY(-76deg) rotateZ(-4deg) scale(0.975);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1600px) translateX(-36px) rotateY(-94deg) rotateZ(-5deg) scale(0.965);
+    filter: blur(3px);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: transparent;
+  }
+}

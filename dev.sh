@@ -35,19 +35,22 @@ compose() {
 
 start() {
   compose up -d db
-  compose up -d service-auth service-users service-girls service-gateway frontend
+  compose up -d service-auth service-users service-girls service-gateway
+  compose up -d frontend-host frontend-remote-main frontend-remote-admin
 
   cat <<'EOF'
 Dev stack started.
 
 Frontend:
-  http://localhost:5173
+  host         http://localhost:3003
+  remote-main  http://localhost:3004
+  remote-admin http://localhost:3005
 
 Backend:
   gateway       http://localhost:3000
   service-auth  http://localhost:3001
   service-girls http://localhost:3002
-  service-users http://localhost:3003
+  service-users http://localhost:3103
 
 Logs:
   ./dev.sh logs

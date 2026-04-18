@@ -51,7 +51,7 @@ services:
     command: >
       sh -c "npm install && npm run dev"
     ports:
-      - "3003:3003"
+      - "3103:3003"
     env_file:
       - .env
     depends_on:
@@ -76,23 +76,50 @@ services:
       - ./backend/static:/app/static
       - service_gateway_node_modules:/usr/src/app/node_modules
 
-  frontend:
+  frontend-host:
     image: node:20
-    working_dir: /app
+    working_dir: /workspace
     command: >
-      sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+      sh -c "npm install && PORT=3003 REMOTE_MAIN_URL=http://localhost:3004 REMOTE_ADMIN_URL=http://localhost:3005 npm run start -w @fwa/host -- --host 0.0.0.0"
     ports:
-      - "5173:5173"
+      - "3003:3003"
     depends_on:
       - service-gateway
     volumes:
-      - ./frontend:/app
-      - ./shared:/shared
-      - frontend_node_modules:/app/node_modules
+      - ./:/workspace
+      - frontend_host_node_modules:/workspace/node_modules
+
+  frontend-remote-main:
+    image: node:20
+    working_dir: /workspace
+    command: >
+      sh -c "npm install && PORT=3004 npm run start -w @fwa/remote-main -- --host 0.0.0.0"
+    ports:
+      - "3004:3004"
+    depends_on:
+      - service-gateway
+    volumes:
+      - ./:/workspace
+      - frontend_remote_main_node_modules:/workspace/node_modules
+
+  frontend-remote-admin:
+    image: node:20
+    working_dir: /workspace
+    command: >
+      sh -c "npm install && PORT=3005 npm run start -w @fwa/remote-admin -- --host 0.0.0.0"
+    ports:
+      - "3005:3005"
+    depends_on:
+      - service-gateway
+    volumes:
+      - ./:/workspace
+      - frontend_remote_admin_node_modules:/workspace/node_modules
 
 volumes:
   mysql_data:
-  frontend_node_modules:
+  frontend_host_node_modules:
+  frontend_remote_main_node_modules:
+  frontend_remote_admin_node_modules:
   service_auth_node_modules:
   service_girls_node_modules:
   service_users_node_modules:

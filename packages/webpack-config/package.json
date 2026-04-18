@@ -1,0 +1,5 @@
+{
+  "name": "@fwa/webpack-config",
+  "private": true,
+  "main": "createWebpackConfig.js"
+}

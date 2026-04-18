@@ -1,0 +1,40 @@
+{
+  "name": "fwa-microfrontends",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "styles": "tailwindcss -i packages/shared-ui/src/index.css -o packages/shared-ui/src/generated.css --config tailwind.config.js",
+    "build": "npm run build -w @fwa/host && npm run build -w @fwa/remote-main && npm run build -w @fwa/remote-admin",
+    "dev:host": "npm run start -w @fwa/host",
+    "dev:remote-main": "npm run start -w @fwa/remote-main",
+    "dev:remote-admin": "npm run start -w @fwa/remote-admin"
+  },
+  "dependencies": {
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.21",
+    "copy-webpack-plugin": "^13.0.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.4",
+    "mini-css-extract-plugin": "^2.9.4",
+    "postcss": "^8.5.6",
+    "postcss-loader": "^8.2.0",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^3.4.17",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  }
+}
