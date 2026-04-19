@@ -5,11 +5,10 @@ import { useLiked } from "../../hooks/useLiked";
 import type { Chan } from "@shared/Profile";
 
 interface LikedProps {
-  onLike: (chan: Chan) => void;
   onSkip: (chan: Chan) => void;
 }
 
-export default function Liked({ onLike, onSkip }: LikedProps) {
+export default function Liked({ onSkip }: LikedProps) {
   const { likedProfiles, loading, refetch } = useLiked();
   const [localProfiles, setLocalProfiles] = useState<Chan[]>([]);
 

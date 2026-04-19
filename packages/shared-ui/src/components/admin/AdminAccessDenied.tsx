@@ -18,7 +18,7 @@ export default function AdminAccessDenied() {
           </div>
 
           <p className="mt-6 text-xs font-semibold uppercase tracking-[0.34em] text-anime-textSoft/60">
-            Access Restricted
+            Доступ ограничен
           </p>
           <h1 className="mt-3 text-3xl font-bold text-white md:text-4xl">
             У этой учетной записи нет доступа к админ-зоне
@@ -31,8 +31,8 @@ export default function AdminAccessDenied() {
           <div className="mt-8 rounded-[28px] border border-white/8 bg-white/[0.04] px-6 py-5 text-left">
             <div className="text-sm font-semibold text-white">Что можно сделать</div>
             <div className="mt-3 space-y-2 text-sm leading-6 text-anime-textSoft">
-              <p>1. Войти под аккаунтом, email которого включен в `backend/services/service-auth/src/config/admins.json`.</p>
-              <p>2. Или добавить свой email в список админов и заново выполнить логин.</p>
+              <p>1. Войти под аккаунтом, у которого уже есть права администратора.</p>
+              <p>2. Если эта учетная запись должна иметь доступ, выдай ей права и войди заново.</p>
             </div>
           </div>
 

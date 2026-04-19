@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
   FinishScreen,
-  LikedPage,
   ProfileSettingsPage,
   SwipeScreen,
   useChan
@@ -24,7 +23,6 @@ export default function AppRoutes() {
           />
         }
       />
-      <Route path="liked" element={<LikedPage onLike={handleLike} onSkip={handleSkip} />} />
       <Route path="settings" element={<ProfileSettingsPage />} />
       <Route
         path="finish"

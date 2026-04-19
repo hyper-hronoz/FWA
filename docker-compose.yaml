@@ -66,6 +66,7 @@ services:
       args:
         REMOTE_MAIN_URL: http://localhost:3004
         REMOTE_ADMIN_URL: http://localhost:3005
+        REMOTE_LIKED_URL: http://localhost:3006
     container_name: fwa_frontend_host
     ports:
       - "80:80"
@@ -89,6 +90,16 @@ services:
     container_name: fwa_frontend_remote_admin
     ports:
       - "3005:80"
+    depends_on:
+      - service-gateway
+
+  frontend-remote-liked:
+    build:
+      context: .
+      dockerfile: apps/remote-liked/Dockerfile
+    container_name: fwa_frontend_remote_liked
+    ports:
+      - "3006:80"
     depends_on:
       - service-gateway
 

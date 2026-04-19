@@ -20,6 +20,12 @@ const loadMainRemoteRoutes = () =>
     delayMs: 1200
   });
 
+const loadLikedRemoteRoutes = () =>
+  importWithRetry(() => import("likedRemote/AppRoutes"), {
+    attempts: 6,
+    delayMs: 1200
+  });
+
 const loadAdminRemoteRoutes = () =>
   importWithRetry(() => import("adminRemote/AppRoutes"), {
     attempts: 6,
@@ -53,13 +59,24 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route element={<ShellLayout />}>
                     <Route
+                      path="/app/liked/*"
+                      element={
+                        <MicrofrontendBoundary
+                          loader={loadLikedRemoteRoutes}
+                          title="Раздел лайкнутых временно недоступен"
+                          description="Список понравившихся карточек сейчас не открылся. Можно попробовать загрузить его снова без полного перезапуска приложения."
+                          loadingLabel="Открываем лайкнутые..."
+                        />
+                      }
+                    />
+                    <Route
                       path="/app/*"
                       element={
                         <MicrofrontendBoundary
                           loader={loadMainRemoteRoutes}
                           title="Основной микрофронт временно недоступен"
-                          description="Пользовательский поток не загрузился с первого раза. Host попробует переподключить remote, а ты можешь вручную повторить подключение без полного рестарта приложения."
-                          loadingLabel="Подключаем пользовательский поток..."
+                          description="Раздел не открылся с первого раза. Можно попробовать подключить его снова без полного перезапуска приложения."
+                          loadingLabel="Подготавливаем раздел..."
                         />
                       }
                     />
@@ -74,8 +91,8 @@ export default function App() {
                         <MicrofrontendBoundary
                           loader={loadAdminRemoteRoutes}
                           title="Админ-микрофронт временно недоступен"
-                          description="Админский remote сейчас не ответил. Shell остается живым и может заново подключить его без разрыва пользовательской сессии."
-                          loadingLabel="Подключаем админ-поток..."
+                          description="Раздел управления сейчас недоступен. Можно попробовать открыть его снова, не перезапуская приложение."
+                          loadingLabel="Открываем раздел управления..."
                         />
                       }
                     />

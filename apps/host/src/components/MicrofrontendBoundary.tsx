@@ -78,12 +78,11 @@ function RemoteLoadingCard({ loadingLabel }: { loadingLabel: string }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,105,180,0.16),_transparent_36%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.12),_transparent_32%)]" />
         <div className="relative">
           <div className="mb-3 text-xs font-semibold uppercase tracking-[0.34em] text-anime-textSoft/65">
-            Remote Bootstrap
+            Почти готово
           </div>
           <div className="text-3xl font-bold text-white md:text-4xl">{loadingLabel}</div>
           <p className="mt-4 max-w-xl text-base leading-7 text-anime-textSoft">
-            Host поднимает контейнер remote, синхронизирует общие зависимости и подключает маршрут без полной
-            перезагрузки страницы.
+            Подготавливаем экран и загружаем нужный раздел. Обычно это занимает всего пару секунд.
           </p>
 
           <div className="mt-8 space-y-4">
@@ -95,16 +94,16 @@ function RemoteLoadingCard({ loadingLabel }: { loadingLabel: string }) {
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left">
-                <div className="text-xs uppercase tracking-[0.24em] text-anime-textSoft/60">Container</div>
-                <div className="mt-2 text-sm font-semibold text-white">remoteEntry.js</div>
+                <div className="text-xs uppercase tracking-[0.24em] text-anime-textSoft/60">Соединение</div>
+                <div className="mt-2 text-sm font-semibold text-white">Проверяем доступ</div>
               </div>
               <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left">
-                <div className="text-xs uppercase tracking-[0.24em] text-anime-textSoft/60">Shared</div>
-                <div className="mt-2 text-sm font-semibold text-white">React + shared-ui</div>
+                <div className="text-xs uppercase tracking-[0.24em] text-anime-textSoft/60">Данные</div>
+                <div className="mt-2 text-sm font-semibold text-white">Синхронизация</div>
               </div>
               <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left">
-                <div className="text-xs uppercase tracking-[0.24em] text-anime-textSoft/60">Route</div>
-                <div className="mt-2 text-sm font-semibold text-white">Hydrating module</div>
+                <div className="text-xs uppercase tracking-[0.24em] text-anime-textSoft/60">Открытие</div>
+                <div className="mt-2 text-sm font-semibold text-white">Запускаем экран</div>
               </div>
             </div>
           </div>

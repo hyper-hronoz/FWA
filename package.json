@@ -7,9 +7,10 @@
   ],
   "scripts": {
     "styles": "tailwindcss -i packages/shared-ui/src/index.css -o packages/shared-ui/src/generated.css --config tailwind.config.js",
-    "build": "npm run build -w @fwa/host && npm run build -w @fwa/remote-main && npm run build -w @fwa/remote-admin",
+    "build": "npm run build -w @fwa/host && npm run build -w @fwa/remote-main && npm run build -w @fwa/remote-liked && npm run build -w @fwa/remote-admin",
     "dev:host": "npm run start -w @fwa/host",
     "dev:remote-main": "npm run start -w @fwa/remote-main",
+    "dev:remote-liked": "npm run start -w @fwa/remote-liked",
     "dev:remote-admin": "npm run start -w @fwa/remote-admin"
   },
   "dependencies": {

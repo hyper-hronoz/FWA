@@ -10,6 +10,7 @@ export { default as AdminPanelPage } from "./components/admin/AdminPanel";
 export { default as BackgroundEffects } from "./components/layout/BackgroundEffects";
 export { default as Navbar } from "./components/layout/Navbar";
 export { default as AnimeLoading } from "./components/ui/AnimeLoading";
+export { API_BASE_URL, ROUTES } from "./config/api";
 export { useChan } from "./hooks/useChan";
 export { useLiked } from "./hooks/useLiked";
 export { useAuth } from "./hooks/useAuth";

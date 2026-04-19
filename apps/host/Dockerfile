@@ -10,9 +10,11 @@ COPY tailwind.config.js tsconfig.base.json ./
 
 ARG REMOTE_MAIN_URL=http://localhost:3004
 ARG REMOTE_ADMIN_URL=http://localhost:3005
+ARG REMOTE_LIKED_URL=http://localhost:3006
 
 ENV REMOTE_MAIN_URL=$REMOTE_MAIN_URL
 ENV REMOTE_ADMIN_URL=$REMOTE_ADMIN_URL
+ENV REMOTE_LIKED_URL=$REMOTE_LIKED_URL
 
 RUN npm install
 RUN npm run build -w @fwa/host

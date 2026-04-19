@@ -69,7 +69,7 @@ export default function Navbar({
                 Anime Love
               </div>
               <div className="truncate text-[11px] uppercase tracking-[0.28em] text-anime-textSoft/70">
-                Microfrontend Shell
+                Аниме знакомства
               </div>
             </div>
           </button>
@@ -125,7 +125,7 @@ export default function Navbar({
                   onClick={() => navigate(paths.mainSwipe)}
                   className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-anime-textSoft transition hover:bg-white/[0.05] hover:text-white"
                 >
-                  <span>Главный поток</span>
+                  <span>Главная</span>
                   <span className="text-white/60">↗</span>
                 </button>
 

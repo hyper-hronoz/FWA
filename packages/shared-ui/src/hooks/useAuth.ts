@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { API_BASE_URL, ROUTES } from '../config/api'
 
 import type { User } from '@shared/Profile'
@@ -12,9 +12,37 @@ export function useAuth() {
   const ACCESS_TOKEN_KEY = 'animeAccessToken'
   const REFRESH_TOKEN_KEY = 'animeRefreshToken'
   const USER_KEY = 'animeUser'
+  const refreshPromiseRef = useRef<Promise<string | null> | null>(null)
 
   useEffect(() => {
     checkAuth()
+  }, [])
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (![ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY].includes(event.key || '')) {
+        return
+      }
+
+      const savedUser = localStorage.getItem(USER_KEY)
+
+      if (!savedUser) {
+        setUser(null)
+        return
+      }
+
+      try {
+        setUser(JSON.parse(savedUser) as User)
+      } catch {
+        setUser(null)
+      }
+    }
+
+    window.addEventListener('storage', handleStorage)
+
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+    }
   }, [])
 
   const saveAuth = (payload: AuthResponse) => {
@@ -87,24 +115,42 @@ export function useAuth() {
   }
 
   const refreshAccessToken = async () => {
+    if (refreshPromiseRef.current) {
+      return refreshPromiseRef.current
+    }
+
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
     if (!refreshToken) return null
 
-    const response = await fetch(`${API_BASE_URL}${ROUTES.auth.refresh}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken })
-    })
+    refreshPromiseRef.current = (async () => {
+      const response = await fetch(`${API_BASE_URL}${ROUTES.auth.refresh}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
+      })
 
-    if (!response.ok) {
-      clearAuth()
-      return null
+      if (!response.ok) {
+        const latestRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+
+        if (latestRefreshToken && latestRefreshToken !== refreshToken) {
+          return localStorage.getItem(ACCESS_TOKEN_KEY)
+        }
+
+        clearAuth()
+        return null
+      }
+
+      const refreshed = await response.json() as { accessToken: string; refreshToken: string }
+      localStorage.setItem(ACCESS_TOKEN_KEY, refreshed.accessToken)
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshed.refreshToken)
+      return refreshed.accessToken
+    })()
+
+    try {
+      return await refreshPromiseRef.current
+    } finally {
+      refreshPromiseRef.current = null
     }
-
-    const refreshed = await response.json() as { accessToken: string; refreshToken: string }
-    localStorage.setItem(ACCESS_TOKEN_KEY, refreshed.accessToken)
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshed.refreshToken)
-    return refreshed.accessToken
   }
 
   const authFetch = async (url: string, options: RequestInit = {}) => {

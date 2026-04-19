@@ -75,10 +75,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                <Route
                   path="/liked"
-                  element={<Liked 
-                    onLike={handleLike}
-                    onSkip={handleSkip}
-                  />}
+                  element={<Liked onSkip={handleSkip} />}
                 />
               </Route>
 

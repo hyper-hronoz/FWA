@@ -15,7 +15,7 @@ export function MicrofrontendFallback({ title, description, onRetry, isRecoverin
             🛠️
           </div>
           <div className="mb-3 text-xs font-semibold uppercase tracking-[0.34em] text-anime-textSoft/65">
-            Microfrontend Recovery
+            Попробуем снова
           </div>
           <h2 className="text-3xl font-bold text-white md:text-4xl">{title}</h2>
           <p className="mt-4 text-base leading-7 text-anime-textSoft">
@@ -28,7 +28,7 @@ export function MicrofrontendFallback({ title, description, onRetry, isRecoverin
                 disabled={isRecovering}
                 className="rounded-full bg-gradient-to-r from-anime-primary to-anime-secondary px-6 py-3 font-semibold text-white shadow-[0_14px_40px_rgba(255,105,180,0.24)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isRecovering ? "Переподключаем модуль..." : "Повторить подключение"}
+                {isRecovering ? "Повторяем попытку..." : "Попробовать еще раз"}
               </button>
             )}
             <button
@@ -39,7 +39,7 @@ export function MicrofrontendFallback({ title, description, onRetry, isRecoverin
             </button>
           </div>
           <div className="mt-6 text-sm text-anime-textSoft/70">
-            Host остается живым и может заново подключить remote без полной перезагрузки.
+            Приложение продолжает работать и может попробовать открыть этот раздел снова без полной перезагрузки.
           </div>
         </div>
       </div>

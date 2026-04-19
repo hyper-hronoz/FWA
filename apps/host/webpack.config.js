@@ -2,6 +2,7 @@ const { createWebpackConfig } = require("../../packages/webpack-config/createWeb
 
 const remoteMainUrl = process.env.REMOTE_MAIN_URL || "http://localhost:3004";
 const remoteAdminUrl = process.env.REMOTE_ADMIN_URL || "http://localhost:3005";
+const remoteLikedUrl = process.env.REMOTE_LIKED_URL || "http://localhost:3006";
 
 module.exports = (_, argv) =>
   createWebpackConfig({
@@ -13,7 +14,8 @@ module.exports = (_, argv) =>
       name: "host",
       remotes: {
         mainRemote: `mainRemote@${remoteMainUrl}/remoteEntry.js`,
-        adminRemote: `adminRemote@${remoteAdminUrl}/remoteEntry.js`
+        adminRemote: `adminRemote@${remoteAdminUrl}/remoteEntry.js`,
+        likedRemote: `likedRemote@${remoteLikedUrl}/remoteEntry.js`
       }
     }
   });

@@ -82,7 +82,7 @@ services:
     image: node:20
     working_dir: /workspace
     command: >
-      sh -c "npm install && PORT=3003 REMOTE_MAIN_URL=http://localhost:3004 REMOTE_ADMIN_URL=http://localhost:3005 npm run start -w @fwa/host -- --host 0.0.0.0"
+      sh -c "npm install && PORT=3003 REMOTE_MAIN_URL=http://localhost:3004 REMOTE_ADMIN_URL=http://localhost:3005 REMOTE_LIKED_URL=http://localhost:3006 npm run start -w @fwa/host -- --host 0.0.0.0"
     ports:
       - "3003:3003"
     depends_on:
@@ -117,10 +117,24 @@ services:
       - ./:/workspace
       - frontend_remote_admin_node_modules:/workspace/node_modules
 
+  frontend-remote-liked:
+    image: node:20
+    working_dir: /workspace
+    command: >
+      sh -c "npm install && PORT=3006 npm run start -w @fwa/remote-liked -- --host 0.0.0.0"
+    ports:
+      - "3006:3006"
+    depends_on:
+      - service-gateway
+    volumes:
+      - ./:/workspace
+      - frontend_remote_liked_node_modules:/workspace/node_modules
+
 volumes:
   mysql_data:
   frontend_host_node_modules:
   frontend_remote_main_node_modules:
+  frontend_remote_liked_node_modules:
   frontend_remote_admin_node_modules:
   service_auth_node_modules:
   service_girls_node_modules:
