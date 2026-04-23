@@ -58,28 +58,32 @@ export default function App() {
 
                 <Route element={<ProtectedRoute />}>
                   <Route element={<ShellLayout />}>
-                    <Route
-                      path="/app/liked/*"
-                      element={
-                        <MicrofrontendBoundary
-                          loader={loadLikedRemoteRoutes}
-                          title="Раздел лайкнутых временно недоступен"
-                          description="Список понравившихся карточек сейчас не открылся. Можно попробовать загрузить его снова без полного перезапуска приложения."
-                          loadingLabel="Открываем лайкнутые..."
-                        />
-                      }
-                    />
-                    <Route
-                      path="/app/*"
-                      element={
-                        <MicrofrontendBoundary
-                          loader={loadMainRemoteRoutes}
-                          title="Основной микрофронт временно недоступен"
-                          description="Раздел не открылся с первого раза. Можно попробовать подключить его снова без полного перезапуска приложения."
-                          loadingLabel="Подготавливаем раздел..."
-                        />
-                      }
-                    />
+                    <Route path="/app">
+                      <Route
+                        path="liked/*"
+                        element={
+                          <MicrofrontendBoundary
+                            boundaryKey="liked"
+                            loader={loadLikedRemoteRoutes}
+                            title="Раздел лайкнутых временно недоступен"
+                            description="Список понравившихся карточек сейчас не открылся. Можно попробовать загрузить его снова без полного перезапуска приложения."
+                            loadingLabel="Открываем лайкнутые..."
+                          />
+                        }
+                      />
+                      <Route
+                        path="*"
+                        element={
+                          <MicrofrontendBoundary
+                            boundaryKey="main"
+                            loader={loadMainRemoteRoutes}
+                            title="Основной микрофронт временно недоступен"
+                            description="Раздел не открылся с первого раза. Можно попробовать подключить его снова без полного перезапуска приложения."
+                            loadingLabel="Подготавливаем раздел..."
+                          />
+                        }
+                      />
+                    </Route>
                   </Route>
                 </Route>
 
@@ -89,6 +93,7 @@ export default function App() {
                       path="/admin/*"
                       element={
                         <MicrofrontendBoundary
+                          boundaryKey="admin"
                           loader={loadAdminRemoteRoutes}
                           title="Админ-микрофронт временно недоступен"
                           description="Раздел управления сейчас недоступен. Можно попробовать открыть его снова, не перезапуская приложение."

@@ -16,6 +16,7 @@ import { MicrofrontendFallback } from "./MicrofrontendFallback";
 type Loader = () => Promise<{ default: ComponentType }>;
 
 type Props = {
+  boundaryKey?: string;
   loader: Loader;
   title: string;
   description?: string;
@@ -114,6 +115,7 @@ function RemoteLoadingCard({ loadingLabel }: { loadingLabel: string }) {
 }
 
 export function MicrofrontendBoundary({
+  boundaryKey = "default",
   loader,
   title,
   description,
@@ -136,6 +138,7 @@ export function MicrofrontendBoundary({
 
   return (
     <RemoteErrorBoundary
+      key={`${boundaryKey}:${retryToken}`}
       title={title}
       description={description}
       onRetry={handleRetry}

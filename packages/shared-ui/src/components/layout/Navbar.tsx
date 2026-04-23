@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom" 
+import { Link, NavLink, useLocation } from "react-router-dom"
 import { useAppPaths } from "../../routing/AppPathsContext"
 
 import type { User } from "@shared/Profile"
@@ -11,7 +11,6 @@ export default function Navbar({
   onLogout
 }: NavbarProps) {
   const [showMenu, setShowMenu] = useState(false)
-  const navigate = useNavigate()
   const location = useLocation()
   const paths = useAppPaths()
   const menuRef = useRef<HTMLDivElement | null>(null)
@@ -59,8 +58,8 @@ export default function Navbar({
     <nav className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/55 backdrop-blur-2xl shadow-[0_1px_0_rgba(255,255,255,0.04),0_18px_45px_rgba(6,6,16,0.42)]">
       <div className="mx-auto flex max-w-[1600px] items-center gap-4 px-4 py-3 md:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <button
-            onClick={() => navigate(paths.mainSwipe)}
+          <Link
+            to={paths.mainSwipe}
             className="group flex min-w-0 items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-anime-primary/30 hover:bg-white/[0.05]"
           >
             <div className="h-10 w-10 rounded-2xl bg-[linear-gradient(135deg,rgba(255,105,180,0.26),rgba(59,130,246,0.16))] shadow-[0_0_30px_rgba(255,105,180,0.18)]" />
@@ -72,16 +71,16 @@ export default function Navbar({
                 Аниме знакомства
               </div>
             </div>
-          </button>
+          </Link>
 
         </div>
 
         <div className="hidden flex-1 justify-center lg:flex">
           <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] p-1 shadow-inner shadow-black/20">
             {navItems.map((item) => (
-              <button
+              <NavLink
                 key={item.path}
-                onClick={() => navigate(item.path)}
+                to={item.path}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   isActiveRoute(item.path)
                     ? "bg-gradient-to-r from-anime-primary to-anime-secondary text-white shadow-[0_10px_35px_rgba(255,105,180,0.24)]"
@@ -89,7 +88,7 @@ export default function Navbar({
                 }`}
               >
                 {item.label}
-              </button>
+              </NavLink>
             ))}
           </div>
         </div>
@@ -107,6 +106,7 @@ export default function Navbar({
 
           <div className="relative" ref={menuRef}>
             <button
+              type="button"
               onClick={() => setShowMenu((prev) => !prev)}
               className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-anime-primary/80 to-anime-secondary/80 text-lg shadow-[0_12px_32px_rgba(155,89,182,0.25)] transition hover:scale-105 hover:shadow-[0_14px_36px_rgba(255,105,180,0.28)]"
               aria-label="User menu"
@@ -121,43 +121,44 @@ export default function Navbar({
                   <div className="text-xs text-anime-textSoft/70">{user.email}</div>
                 </div>
 
-                <button
-                  onClick={() => navigate(paths.mainSwipe)}
+                <Link
+                  to={paths.mainSwipe}
                   className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-anime-textSoft transition hover:bg-white/[0.05] hover:text-white"
                 >
                   <span>Главная</span>
                   <span className="text-white/60">↗</span>
-                </button>
+                </Link>
 
-                <button
-                  onClick={() => navigate(paths.liked)}
+                <Link
+                  to={paths.liked}
                   className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-anime-textSoft transition hover:bg-white/[0.05] hover:text-white"
                 >
                   <span>Лайкнутые</span>
                   <span className="text-white/60">♥</span>
-                </button>
+                </Link>
 
-                <button
-                  onClick={() => navigate(paths.settings)}
+                <Link
+                  to={paths.settings}
                   className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-anime-textSoft transition hover:bg-white/[0.05] hover:text-white"
                 >
                   <span>Настройки</span>
                   <span className="text-white/60">⚙</span>
-                </button>
+                </Link>
 
                 {user["is_admin"] === true && (
-                  <button
-                    onClick={() => navigate(paths.admin)}
+                  <Link
+                    to={paths.admin}
                     className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-anime-textSoft transition hover:bg-white/[0.05] hover:text-white"
                   >
                     <span>Админ-зона</span>
                     <span className="text-white/60">✦</span>
-                  </button>
+                  </Link>
                 )}
 
                 <div className="my-2 h-px bg-white/8" />
 
                 <button
+                  type="button"
                   onClick={onLogout}
                   className="flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-rose-500/85 to-fuchsia-500/80 px-4 py-3 text-left font-semibold text-white shadow-[0_10px_30px_rgba(244,63,94,0.24)] transition hover:brightness-105"
                 >

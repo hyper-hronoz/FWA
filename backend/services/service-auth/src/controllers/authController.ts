@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import type { Secret, SignOptions } from "jsonwebtoken";
 import { db } from "../db/db";
 import type {AuthResponse} from "../shared/Auth"
 import { User } from "../shared/Profile";
 import adminsConfig from "../config/admins.json";
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "SECRET_KEY";
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "REFRESH_SECRET_KEY";
-const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || "15m";
-const REFRESH_TOKEN_TTL = "7d";
+const ACCESS_TOKEN_SECRET: Secret = process.env.ACCESS_TOKEN_SECRET || "SECRET_KEY";
+const REFRESH_TOKEN_SECRET: Secret = process.env.REFRESH_TOKEN_SECRET || "REFRESH_SECRET_KEY";
+const ACCESS_TOKEN_TTL: SignOptions["expiresIn"] =
+  (process.env.ACCESS_TOKEN_TTL || "15m") as SignOptions["expiresIn"];
+const REFRESH_TOKEN_TTL: SignOptions["expiresIn"] = "7d";
 const ADMIN_EMAILS = new Set(
   (adminsConfig.emails || []).map((email) => email.toLowerCase())
 );
